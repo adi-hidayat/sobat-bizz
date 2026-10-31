@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('phone', 50)->nullable();
             $table->text('address')->nullable();
             $table->string('industry')->nullable();
-            $table->string('source', 30)->default('website');
+            $table->foreignId('lead_source_id')->nullable()->constrained('lead_sources')->nullOnDelete();
             $table->string('status', 30)->default('new');
             $table->foreignId('assigned_to')->nullable()->constrained('users')->nullOnDelete();
             $table->date('follow_up_date')->nullable();
@@ -27,7 +27,6 @@ return new class extends Migration
             $table->softDeletes();
 
             $table->index(['status', 'follow_up_date']);
-            $table->index('source');
             $table->index('assigned_to');
         });
     }

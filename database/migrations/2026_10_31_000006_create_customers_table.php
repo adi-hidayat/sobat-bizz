@@ -14,8 +14,6 @@ return new class extends Migration
             $table->string('company_name');
             $table->string('customer_type', 30)->default('company');
             $table->string('npwp', 50)->nullable();
-            $table->text('billing_address')->nullable();
-            $table->text('shipping_address')->nullable();
             $table->string('email')->nullable();
             $table->string('phone', 50)->nullable();
             $table->unsignedSmallInteger('payment_term_days')->default(30);

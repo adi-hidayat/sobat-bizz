@@ -15,7 +15,6 @@ return new class extends Migration
             $table->string('contact_person')->nullable();
             $table->string('email')->nullable();
             $table->string('phone', 50)->nullable();
-            $table->text('address')->nullable();
             $table->string('npwp', 50)->nullable();
             $table->unsignedSmallInteger('payment_term_days')->default(30);
             $table->string('status', 30)->default('active');
