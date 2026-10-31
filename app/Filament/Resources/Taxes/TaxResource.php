@@ -7,12 +7,14 @@ use App\Filament\Resources\Taxes\Pages\ListTaxes;
 use App\Filament\Resources\Taxes\Schemas\TaxForm;
 use App\Filament\Resources\Taxes\Schemas\TaxInfolist;
 use App\Filament\Resources\Taxes\Tables\TaxesTable;
+use App\Filament\Support\NavigationGroup;
 use App\Models\Tax;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class TaxResource extends Resource
 {
@@ -22,7 +24,9 @@ class TaxResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedReceiptPercent;
 
-    protected static ?int $navigationSort = 2;
+    protected static string|UnitEnum|null $navigationGroup = NavigationGroup::Finance;
+
+    protected static ?int $navigationSort = 1;
 
     protected static ?string $cluster = SetupCluster::class;
 

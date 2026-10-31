@@ -10,7 +10,8 @@ enum NavigationGroup: string implements HasLabel
     case Catalog = 'catalog';
     case Sales = 'sales';
     case Procurement = 'procurement';
-    case Settings = 'settings';
+    case HumanResources = 'human_resources';
+    case Finance = 'finance';
     case System = 'system';
     case Address = 'address';
 

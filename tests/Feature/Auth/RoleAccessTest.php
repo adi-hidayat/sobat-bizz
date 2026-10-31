@@ -5,6 +5,7 @@ use App\Models\IncomingPo;
 use App\Models\Lead;
 use App\Models\Proposal;
 use App\Models\PurchaseOrder;
+use App\Models\Staff;
 use App\Models\User;
 use Database\Seeders\RoleAndPermissionSeeder;
 
@@ -72,4 +73,14 @@ it('memberi purchasing akses ke purchase order', function () {
 
     expect($purchasing->can('create', PurchaseOrder::class))->toBeTrue()
         ->and($purchasing->can('create', IncomingPo::class))->toBeFalse();
+});
+
+it('membatasi pengelolaan data staff ke administrator', function () {
+    $admin = userWithRole('Administrator');
+    $sales = userWithRole('Sales Executive');
+
+    expect($admin->can('viewAny', Staff::class))->toBeTrue()
+        ->and($admin->can('create', Staff::class))->toBeTrue()
+        ->and($sales->can('viewAny', Staff::class))->toBeTrue()
+        ->and($sales->can('create', Staff::class))->toBeFalse();
 });

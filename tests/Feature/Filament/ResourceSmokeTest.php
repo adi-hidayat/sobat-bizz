@@ -4,9 +4,11 @@ use App\Filament\Resources\Cities\Pages\ListCities;
 use App\Filament\Resources\Countries\Pages\ListCountries;
 use App\Filament\Resources\Customers\Pages\ListCustomers;
 use App\Filament\Resources\DeliveryOrders\Pages\ListDeliveryOrders;
+use App\Filament\Resources\Departments\Pages\ListDepartments;
 use App\Filament\Resources\Districts\Pages\ListDistricts;
 use App\Filament\Resources\IncomingPos\Pages\ListIncomingPos;
 use App\Filament\Resources\Invoices\Pages\ListInvoices;
+use App\Filament\Resources\JobTitles\Pages\ListJobTitles;
 use App\Filament\Resources\Leads\Pages\CreateLead;
 use App\Filament\Resources\Leads\Pages\ListLeads;
 use App\Filament\Resources\LeadSources\Pages\ListLeadSources;
@@ -16,10 +18,10 @@ use App\Filament\Resources\Proposals\Pages\CreateProposal;
 use App\Filament\Resources\Proposals\Pages\ListProposals;
 use App\Filament\Resources\PurchaseOrders\Pages\ListPurchaseOrders;
 use App\Filament\Resources\Quotations\Pages\ListQuotations;
+use App\Filament\Resources\Staff\Pages\ListStaff;
 use App\Filament\Resources\States\Pages\ListStates;
 use App\Filament\Resources\Suppliers\Pages\ListSuppliers;
 use App\Filament\Resources\Taxes\Pages\ListTaxes;
-use App\Filament\Resources\Users\Pages\ListUsers;
 use App\Filament\Resources\Villages\Pages\ListVillages;
 use App\Models\Customer;
 use App\Models\Lead;
@@ -54,9 +56,11 @@ it('merender halaman daftar utama', function (string $page) {
     ListDeliveryOrders::class,
     ListInvoices::class,
     ListPayments::class,
-    ListUsers::class,
+    ListStaff::class,
     ListLeadSources::class,
     ListTaxes::class,
+    ListDepartments::class,
+    ListJobTitles::class,
     ListCountries::class,
     ListStates::class,
     ListCities::class,

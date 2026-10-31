@@ -25,6 +25,8 @@ it('merender seluruh halaman index melalui http', function (string $path) {
     '/admin/suppliers',
     '/admin/products',
     '/admin/setup/product-categories',
+    '/admin/setup/departments',
+    '/admin/setup/job-titles',
     '/admin/proposals',
     '/admin/quotations',
     '/admin/incoming-pos',
@@ -33,7 +35,7 @@ it('merender seluruh halaman index melalui http', function (string $path) {
     '/admin/invoice/invoices',
     '/admin/invoice/payments',
     '/admin/activity-logs',
-    '/admin/users',
+    '/admin/staff',
 ]);
 
 it('merender halaman create seluruh dokumen', function (string $path) {
@@ -66,6 +68,25 @@ it('merender halaman detail melalui http', function () {
 
 it('mengarahkan root ke panel admin', function () {
     $this->get('/')->assertRedirect('/admin');
+});
+
+it('menampilkan grup sdm di sidebar', function () {
+    $this->get('/admin')
+        ->assertOk()
+        ->assertSee('SDM')
+        ->assertSee('/admin/staff', false)
+        ->assertDontSee('Pengaturan');
+});
+
+it('mengelompokkan menu di dalam cluster setup', function () {
+    $this->get('/admin/setup/taxes')
+        ->assertOk()
+        ->assertSee('SDM')
+        ->assertSee('Katalog')
+        ->assertSee('Keuangan')
+        ->assertSee('Alamat')
+        ->assertSee('/admin/setup/departments', false)
+        ->assertSee('/admin/setup/job-titles', false);
 });
 
 it('menempatkan invoice dan payments dalam satu cluster di grup penjualan', function () {

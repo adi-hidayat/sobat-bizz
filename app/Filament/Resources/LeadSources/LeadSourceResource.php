@@ -7,12 +7,14 @@ use App\Filament\Resources\LeadSources\Pages\ListLeadSources;
 use App\Filament\Resources\LeadSources\Schemas\LeadSourceForm;
 use App\Filament\Resources\LeadSources\Schemas\LeadSourceInfolist;
 use App\Filament\Resources\LeadSources\Tables\LeadSourcesTable;
+use App\Filament\Support\NavigationGroup;
 use App\Models\LeadSource;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class LeadSourceResource extends Resource
 {
@@ -31,6 +33,8 @@ class LeadSourceResource extends Resource
     }
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedMegaphone;
+
+    protected static string|UnitEnum|null $navigationGroup = NavigationGroup::Crm;
 
     protected static ?int $navigationSort = 1;
 

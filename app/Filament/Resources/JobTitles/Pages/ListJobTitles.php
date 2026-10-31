@@ -1,0 +1,23 @@
+<?php
+
+namespace App\Filament\Resources\JobTitles\Pages;
+
+use App\Filament\Resources\JobTitles\JobTitleResource;
+use Filament\Actions\CreateAction;
+use Filament\Resources\Pages\ListRecords;
+use Filament\Support\Enums\Width;
+
+class ListJobTitles extends ListRecords
+{
+    protected static string $resource = JobTitleResource::class;
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            CreateAction::make()
+                ->modal()
+                ->slideOver()
+                ->modalWidth(Width::ThreeExtraLarge),
+        ];
+    }
+}

@@ -35,7 +35,9 @@ class RoleAndPermissionSeeder extends Seeder
         'invoice',
         'payment',
         'activity_log',
-        'user',
+        'staff',
+        'department',
+        'job_title',
         'lead_source',
         'tax',
         'region',
@@ -44,6 +46,14 @@ class RoleAndPermissionSeeder extends Seeder
     public function run(): void
     {
         app(PermissionRegistrar::class)->forgetCachedPermissions();
+
+        // Permission resource "user" sudah digantikan oleh "staff".
+        Permission::query()
+            ->whereIn('name', array_map(
+                fn (string $ability): string => "{$ability}_user",
+                self::CRUD,
+            ))
+            ->delete();
 
         foreach (self::RESOURCES as $resource) {
             foreach (self::CRUD as $ability) {

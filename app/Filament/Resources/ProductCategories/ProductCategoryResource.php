@@ -10,12 +10,14 @@ use App\Filament\Resources\ProductCategories\Pages\ViewProductCategory;
 use App\Filament\Resources\ProductCategories\Schemas\ProductCategoryForm;
 use App\Filament\Resources\ProductCategories\Schemas\ProductCategoryInfolist;
 use App\Filament\Resources\ProductCategories\Tables\ProductCategoriesTable;
+use App\Filament\Support\NavigationGroup;
 use App\Models\ProductCategory;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class ProductCategoryResource extends Resource
 {
@@ -25,7 +27,9 @@ class ProductCategoryResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedTag;
 
-    protected static ?int $navigationSort = 3;
+    protected static string|UnitEnum|null $navigationGroup = NavigationGroup::Catalog;
+
+    protected static ?int $navigationSort = 1;
 
     protected static ?string $cluster = SetupCluster::class;
 
