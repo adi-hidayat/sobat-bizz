@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
@@ -113,6 +114,11 @@ class Lead extends Model
     public function rating(): BelongsTo
     {
         return $this->belongsTo(LeadRating::class, 'lead_rating_id');
+    }
+
+    public function salesTeam(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'lead_sales')->withTimestamps();
     }
 
     public function contacts(): MorphMany

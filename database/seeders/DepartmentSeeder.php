@@ -15,6 +15,11 @@ class DepartmentSeeder extends Seeder
             'Purchasing',
             'Warehouse',
             'IT',
+            'Marketing',
+            'Human Resources',
+            'Customer Service',
+            'Legal',
+            'Operations',
         ];
 
         foreach ($departments as $index => $name) {

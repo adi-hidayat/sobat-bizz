@@ -13,6 +13,7 @@ class DatabaseSeeder extends Seeder
             DepartmentSeeder::class,
             JobTitleSeeder::class,
             AdminUserSeeder::class,
+            StaffSeeder::class,
             LeadSourceSeeder::class,
             TaxSeeder::class,
             MasterDataSeeder::class,

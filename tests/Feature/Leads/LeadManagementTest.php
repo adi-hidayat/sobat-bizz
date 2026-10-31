@@ -6,6 +6,7 @@ use App\Enums\LeadActivityType;
 use App\Enums\LeadStatus;
 use App\Enums\LeadType;
 use App\Filament\Resources\Leads\Pages\CreateLead;
+use App\Filament\Resources\Leads\Pages\EditLead;
 use App\Filament\Resources\Leads\Pages\ListLeads;
 use App\Filament\Resources\Leads\Pages\ViewLead;
 use App\Filament\Resources\Leads\RelationManagers\ActivitiesRelationManager;
@@ -143,6 +144,41 @@ it('menampilkan aktivitas pada halaman lead', function () {
         ->assertCanSeeTableRecords([$activity]);
 });
 
+it('menyimpan owner dan tim sales tambahan pada lead', function () {
+    $owner = User::factory()->create(['is_active' => true]);
+    $member = User::factory()->create(['is_active' => true]);
+    $source = LeadSource::factory()->create();
+
+    livewire(CreateLead::class)
+        ->fillForm([
+            'lead_type' => LeadType::Company->value,
+            'company_name' => 'PT Tim Sales',
+            'lead_source_id' => $source->getKey(),
+            'status' => LeadStatus::New->value,
+            'assigned_to' => $owner->getKey(),
+            'salesTeam' => [$member->getKey()],
+        ])
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    $lead = Lead::query()->where('company_name', 'PT Tim Sales')->firstOrFail();
+
+    expect($lead->assigned_to)->toBe($owner->getKey())
+        ->and($lead->salesTeam->pluck('id')->all())->toBe([$member->getKey()]);
+});
+
+it('mengeluarkan owner dari daftar tim sales', function () {
+    $owner = User::factory()->create(['is_active' => true]);
+    $lead = Lead::factory()->assignedTo($owner)->create();
+    $lead->salesTeam()->attach($owner->getKey());
+
+    livewire(EditLead::class, ['record' => $lead->getKey()])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect($lead->salesTeam()->count())->toBe(0);
+});
+
 it('menyaring lead berdasarkan sales yang dipilih', function () {
     $admin = User::factory()->create(['is_active' => true]);
     $admin->assignRole('Administrator');
@@ -152,10 +188,12 @@ it('menyaring lead berdasarkan sales yang dipilih', function () {
 
     $mine = Lead::factory()->assignedTo($admin)->create();
     $theirs = Lead::factory()->assignedTo($other)->create();
+    $teamOnly = Lead::factory()->assignedTo($other)->create();
+    $teamOnly->salesTeam()->attach($admin->getKey());
 
     livewire(ListLeads::class)
         ->filterTable('assigned_to', ['value' => $admin->getKey()])
-        ->assertCanSeeTableRecords([$mine])
+        ->assertCanSeeTableRecords([$mine, $teamOnly])
         ->assertCanNotSeeTableRecords([$theirs]);
 });
 

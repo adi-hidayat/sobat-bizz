@@ -94,6 +94,21 @@ class LeadForm
                                             ->relationship('assignedSalesPerson', 'name')
                                             ->searchable()
                                             ->preload(),
+                                        Select::make('salesTeam')
+                                            ->label(__('resources/lead.fields.sales_team'))
+                                            ->relationship(
+                                                'salesTeam',
+                                                'name',
+                                                modifyQueryUsing: function (Builder $query, Get $get): Builder {
+                                                    $ownerId = $get('assigned_to');
+
+                                                    return filled($ownerId) ? $query->whereKeyNot($ownerId) : $query;
+                                                },
+                                            )
+                                            ->multiple()
+                                            ->searchable()
+                                            ->preload()
+                                            ->columnSpanFull(),
                                         TextInput::make('estimated_value')
                                             ->label(__('resources/lead.fields.estimated_value'))
                                             ->numeric()

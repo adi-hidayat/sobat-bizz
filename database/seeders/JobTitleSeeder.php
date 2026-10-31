@@ -17,6 +17,18 @@ class JobTitleSeeder extends Seeder
             'Warehouse Staff',
             'Finance Staff',
             'Management',
+            'Marketing Manager',
+            'Marketing Staff',
+            'HR Manager',
+            'HR Staff',
+            'Customer Service',
+            'Legal Officer',
+            'Operations Manager',
+            'Accountant',
+            'Admin Staff',
+            'Sales Support',
+            'Product Manager',
+            'Finance Manager',
         ];
 
         foreach ($jobTitles as $index => $name) {

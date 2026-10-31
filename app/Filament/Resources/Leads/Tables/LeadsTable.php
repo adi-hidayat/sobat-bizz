@@ -75,6 +75,10 @@ class LeadsTable
                 TextColumn::make('assignedSalesPerson.name')
                     ->label(__('resources/lead.fields.sales'))
                     ->toggleable(),
+                TextColumn::make('salesTeam.name')
+                    ->label(__('resources/lead.fields.sales_team'))
+                    ->badge()
+                    ->toggleable(),
                 TextColumn::make('follow_up_date')
                     ->label(__('resources/lead.fields.follow_up'))
                     ->date('d M Y')
@@ -131,7 +135,14 @@ class LeadsTable
                     })
                     ->query(fn (Builder $query, array $data): Builder => $query->when(
                         filled($data['value'] ?? null),
-                        fn (Builder $query): Builder => $query->where('assigned_to', $data['value']),
+                        fn (Builder $query): Builder => $query->where(
+                            fn (Builder $query): Builder => $query
+                                ->where('assigned_to', $data['value'])
+                                ->orWhereHas(
+                                    'salesTeam',
+                                    fn (Builder $query): Builder => $query->whereKey($data['value']),
+                                ),
+                        ),
                     )),
                 Filter::make('overdue_follow_up')
                     ->label(__('resources/lead.filters.overdue_follow_up'))

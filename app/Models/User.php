@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -39,6 +40,11 @@ class User extends Authenticatable implements FilamentUser
     public function staff(): HasOne
     {
         return $this->hasOne(Staff::class);
+    }
+
+    public function salesLeads(): BelongsToMany
+    {
+        return $this->belongsToMany(Lead::class, 'lead_sales')->withTimestamps();
     }
 
     public function jobTitle(): BelongsTo

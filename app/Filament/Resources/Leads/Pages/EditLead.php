@@ -22,4 +22,11 @@ class EditLead extends EditRecord
             RestoreAction::make(),
         ];
     }
+
+    protected function afterSave(): void
+    {
+        if (filled($this->record->assigned_to)) {
+            $this->record->salesTeam()->detach($this->record->assigned_to);
+        }
+    }
 }

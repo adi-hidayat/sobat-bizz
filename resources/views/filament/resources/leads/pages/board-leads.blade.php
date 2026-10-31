@@ -250,16 +250,93 @@
 
         .lead-board-card-footer {
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             justify-content: space-between;
-            gap: 0.375rem;
+            gap: 0.5rem;
+            padding-top: 0.375rem;
+            border-top: 1px solid var(--lb-border);
             font-size: 0.6875rem;
             color: var(--lb-muted);
+        }
+
+        .lead-board-card-people {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            min-width: 0;
+        }
+
+        .lead-board-person {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.125rem;
+            min-width: 0;
+        }
+
+        .lead-board-person-label {
+            flex: none;
+            font-size: 0.6875rem;
+            font-weight: 400;
+            color: var(--lb-muted);
+        }
+
+        .lead-board-person-value {
+            color: var(--lb-text);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .lead-board-follow-up {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 0.125rem;
+            flex: none;
         }
 
         .lead-board-card-footer .is-overdue {
             color: #ef4444;
             font-weight: 600;
+        }
+
+        .lead-board-team {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .lead-board-team-avatar-wrap {
+            display: inline-flex;
+        }
+
+        .lead-board-tooltip {
+            position: fixed;
+            z-index: 9999;
+            transform: translate(-50%, -100%);
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.375rem;
+            background: rgb(17 24 39 / 0.95);
+            color: #fff;
+            font-size: 0.625rem;
+            line-height: 1.2;
+            white-space: nowrap;
+            pointer-events: none;
+            box-shadow: 0 4px 12px rgb(0 0 0 / 0.2);
+        }
+
+        .lead-board-team-avatar {
+            width: 1.5rem;
+            height: 1.5rem;
+            border-radius: 9999px;
+            object-fit: cover;
+            border: 1px solid var(--lb-card);
+        }
+
+        .lead-board-team-more {
+            font-size: 0.625rem;
+            color: var(--lb-muted);
         }
 
         .lead-board-move {
@@ -376,6 +453,20 @@
             dropSlot: null,
             pending: null,
             lostReason: '',
+            tooltip: { show: false, text: '', x: 0, y: 0 },
+            showTooltip(event, text) {
+                const rect = event.currentTarget.getBoundingClientRect();
+
+                this.tooltip = {
+                    show: true,
+                    text: text,
+                    x: rect.left + (rect.width / 2),
+                    y: rect.top - 8,
+                };
+            },
+            hideTooltip() {
+                this.tooltip = { ...this.tooltip, show: false };
+            },
             init() {
                 document.querySelectorAll('.lead-board-drop-slot').forEach((slot) => slot.remove());
 
@@ -546,12 +637,80 @@
                                 @endif
 
                                 <div class="lead-board-card-footer">
-                                    <span>{{ $lead->assignedSalesPerson?->name ?? __('resources/lead.board.unassigned') }}</span>
+                                    <div class="lead-board-card-people">
+                                        <div class="lead-board-person">
+                                            <span class="lead-board-person-label">
+                                                {{ __('resources/lead.fields.sales_person') }}
+                                            </span>
+
+                                            @if ($lead->assignedSalesPerson)
+                                                <div class="lead-board-team">
+                                                    <span
+                                                        class="lead-board-team-avatar-wrap"
+                                                        data-name="{{ $lead->assignedSalesPerson->name }}"
+                                                        x-on:mouseenter="showTooltip($event, $event.currentTarget.dataset.name)"
+                                                        x-on:mouseleave="hideTooltip()"
+                                                    >
+                                                        <img
+                                                            src="{{ $lead->assignedSalesPerson->avatar_url }}"
+                                                            alt="{{ $lead->assignedSalesPerson->name }}"
+                                                            class="lead-board-team-avatar"
+                                                        />
+                                                    </span>
+                                                </div>
+                                            @else
+                                                <span class="lead-board-person-value">-</span>
+                                            @endif
+                                        </div>
+
+                                        <div class="lead-board-person">
+                                            <span class="lead-board-person-label">
+                                                {{ __('resources/lead.fields.sales_team') }}
+                                            </span>
+
+                                            @if ($lead->salesTeam->isNotEmpty())
+                                                <div class="lead-board-team">
+                                                    @foreach ($lead->salesTeam->take(3) as $member)
+                                                        <span
+                                                            class="lead-board-team-avatar-wrap"
+                                                            data-name="{{ $member->name }}"
+                                                            x-on:mouseenter="showTooltip($event, $event.currentTarget.dataset.name)"
+                                                            x-on:mouseleave="hideTooltip()"
+                                                        >
+                                                            <img
+                                                                src="{{ $member->avatar_url }}"
+                                                                alt="{{ $member->name }}"
+                                                                class="lead-board-team-avatar"
+                                                            />
+                                                        </span>
+                                                    @endforeach
+
+                                                    @if ($lead->salesTeam->count() > 3)
+                                                        <span
+                                                            class="lead-board-team-more"
+                                                            data-name="{{ $lead->salesTeam->skip(3)->pluck('name')->implode(', ') }}"
+                                                            x-on:mouseenter="showTooltip($event, $event.currentTarget.dataset.name)"
+                                                            x-on:mouseleave="hideTooltip()"
+                                                        >
+                                                            +{{ $lead->salesTeam->count() - 3 }}
+                                                        </span>
+                                                    @endif
+                                                </div>
+                                            @else
+                                                <span class="lead-board-person-value">{{ __('common.placeholders.none') }}</span>
+                                            @endif
+                                        </div>
+                                    </div>
 
                                     @if ($lead->follow_up_date)
-                                        <span class="{{ $lead->follow_up_date->isPast() ? 'is-overdue' : '' }}">
-                                            {{ $lead->follow_up_date->format('d M Y') }}
-                                        </span>
+                                        <div class="lead-board-follow-up">
+                                            <span class="lead-board-person-label">
+                                                {{ __('resources/lead.fields.follow_up') }}
+                                            </span>
+                                            <span class="lead-board-person-value {{ $lead->follow_up_date->isPast() ? 'is-overdue' : '' }}">
+                                                {{ $lead->follow_up_date->format('d M Y') }}
+                                            </span>
+                                        </div>
                                     @endif
                                 </div>
 
@@ -616,6 +775,16 @@
                     </div>
                 </div>
             </div>
+        </template>
+
+        <template x-teleport="body">
+            <div
+                x-show="tooltip.show"
+                x-cloak
+                class="lead-board-tooltip"
+                x-bind:style="'left: ' + tooltip.x + 'px; top: ' + tooltip.y + 'px;'"
+                x-text="tooltip.text"
+            ></div>
         </template>
     </div>
 </x-filament-panels::page>

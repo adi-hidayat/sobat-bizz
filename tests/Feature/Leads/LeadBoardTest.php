@@ -97,9 +97,9 @@ it('menandai pengguna saat ini pada pilihan sales', function () {
     $options = livewire(BoardLeads::class)->instance()->getUserOptions();
 
     expect($options[$this->admin->getKey()])
-        ->toContain(__('resources/lead.board.you_option', ['name' => $this->admin->name]))
+        ->toContain(e(__('resources/lead.board.you_option', ['name' => $this->admin->name])))
         ->toContain('<img')
-        ->and($options[$other->getKey()])->toContain($other->name)
+        ->and($options[$other->getKey()])->toContain(e($other->name))
         ->toContain('<img');
 });
 
@@ -145,6 +145,30 @@ it('mengirim notifikasi urutan ketika hanya mengubah posisi', function () {
         ->assertNotified(__('resources/lead.board.notifications.reordered', [
             'lead' => $second->display_name,
         ]));
+});
+
+it('menampilkan avatar tim sales pada kartu board', function () {
+    $member = User::factory()->create(['name' => 'Sales Pendukung', 'is_active' => true]);
+    $lead = Lead::factory()->create();
+    $lead->salesTeam()->attach($member->getKey());
+
+    livewire(BoardLeads::class)
+        ->assertSeeHtml('lead-board-team-avatar')
+        ->assertSee('Sales Pendukung');
+});
+
+it('menyaring board berdasarkan owner atau anggota tim sales', function () {
+    $member = User::factory()->create(['is_active' => true]);
+    $other = User::factory()->create(['is_active' => true]);
+
+    $ownerLead = Lead::factory()->assignedTo($other)->create(['company_name' => 'Owner Lead Co']);
+    $teamLead = Lead::factory()->assignedTo($other)->create(['company_name' => 'Team Lead Co']);
+    $teamLead->salesTeam()->attach($member->getKey());
+
+    livewire(BoardLeads::class)
+        ->set('assignedTo', (string) $member->getKey())
+        ->assertSee('Team Lead Co')
+        ->assertDontSee('Owner Lead Co');
 });
 
 it('menolak pengguna tanpa izin melihat daftar lead membuka board', function () {

@@ -136,7 +136,7 @@ class BoardLeads extends Page
         ];
 
         $leads = $this->query()
-            ->with(['leadSource', 'assignedSalesPerson', 'rating'])
+            ->with(['leadSource', 'assignedSalesPerson.staff', 'rating', 'salesTeam.staff'])
             ->orderBy('board_position')
             ->orderByDesc('created_at')
             ->orderByDesc('id')
@@ -327,7 +327,14 @@ class BoardLeads extends Page
                     ->orWhere('phone', 'like', $search)
                     ->orWhere('lead_number', 'like', $search));
             })
-            ->when(filled($this->assignedTo), fn (Builder $query): Builder => $query->where('assigned_to', $this->assignedTo))
+            ->when(filled($this->assignedTo), fn (Builder $query): Builder => $query->where(
+                fn (Builder $query): Builder => $query
+                    ->where('assigned_to', $this->assignedTo)
+                    ->orWhereHas(
+                        'salesTeam',
+                        fn (Builder $query): Builder => $query->whereKey($this->assignedTo),
+                    ),
+            ))
             ->when(filled($this->leadSourceId), fn (Builder $query): Builder => $query->where('lead_source_id', $this->leadSourceId))
             ->when(filled($this->leadRatingId), fn (Builder $query): Builder => $query->where('lead_rating_id', $this->leadRatingId))
             ->when(filled($this->leadType), fn (Builder $query): Builder => $query->where('lead_type', $this->leadType));

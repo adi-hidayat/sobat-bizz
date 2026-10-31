@@ -37,7 +37,7 @@ class LeadSeeder extends Seeder
                 $isCompany = fake()->boolean(70);
                 $requiresLostReason = in_array($status, [LeadStatus::Lost, LeadStatus::Unqualified], true);
 
-                Lead::query()->firstOrCreate(
+                $lead = Lead::query()->firstOrCreate(
                     ['email' => sprintf('seed-%s-%02d@example.test', $status->value, $index)],
                     [
                         'lead_type' => $isCompany ? LeadType::Company : LeadType::Individual,
@@ -60,6 +60,18 @@ class LeadSeeder extends Seeder
                         'last_contacted_at' => fake()->optional()->dateTimeBetween('-2 months', 'now'),
                     ],
                 );
+
+                if ($userIds->count() > 1) {
+                    $teamIds = $userIds
+                        ->reject(fn (int $userId): bool => $userId === (int) $lead->assigned_to)
+                        ->shuffle()
+                        ->take(fake()->numberBetween(0, 2))
+                        ->all();
+
+                    if ($teamIds !== []) {
+                        $lead->salesTeam()->syncWithoutDetaching($teamIds);
+                    }
+                }
             }
         }
     }
