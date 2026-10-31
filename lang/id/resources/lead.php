@@ -60,8 +60,38 @@ return [
     ],
 
     'actions' => [
+        'pipeline' => 'Pipeline',
+        'table' => 'Tabel',
+        'create' => 'Tambah Lead',
         'convert' => 'Konversi ke Customer',
         'convert_description' => 'Lead akan ditandai Converted dan customer baru dibuat dari data lead ini.',
+    ],
+
+    'board' => [
+        'title' => 'Pipeline Lead',
+        'search_placeholder' => 'Cari lead, kontak, email, atau telepon...',
+        'clear_search' => 'Hapus pencarian',
+        'all_sales' => 'Semua sales',
+        'all_sources' => 'Semua sumber',
+        'all_ratings' => 'Semua rating',
+        'all_types' => 'Semua tipe',
+        'you_option' => ':name (Anda)',
+        'empty_column' => 'Belum ada lead.',
+        'unassigned' => 'Belum ada sales',
+        'move' => 'Pindahkan',
+        'lost_reason_title' => 'Alasan lost / tidak berkualitas',
+        'lost_reason_help' => 'Isi alasan sebelum memindahkan lead ke status ini.',
+        'lost_reason_placeholder' => 'Contoh: budget belum tersedia, memilih kompetitor, dsb.',
+        'errors' => [
+            'conversion_blocked' => 'Konversi hanya bisa melalui aksi Konversi ke Customer.',
+            'lost_reason_required' => 'Alasan wajib diisi untuk status Hilang atau Tidak Berkualitas.',
+        ],
+        'notifications' => [
+            'moved' => ':lead dipindahkan ke :status.',
+            'reordered' => 'Urutan :lead diperbarui.',
+            'not_found' => 'Lead tidak ditemukan.',
+            'invalid_status' => 'Status tidak valid.',
+        ],
     ],
 
     'notifications' => [

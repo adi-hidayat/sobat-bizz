@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\Leads\Schemas;
 
-use App\Enums\LeadRating;
 use App\Enums\LeadStatus;
 use App\Enums\LeadType;
 use App\Models\LeadSource;
@@ -69,9 +68,11 @@ class LeadForm
                                             ->default(LeadStatus::New)
                                             ->required()
                                             ->live(),
-                                        Select::make('rating')
+                                        Select::make('lead_rating_id')
                                             ->label(__('resources/lead.fields.rating'))
-                                            ->options(LeadRating::class),
+                                            ->relationship('rating', 'name')
+                                            ->searchable()
+                                            ->preload(),
                                         Select::make('lead_source_id')
                                             ->label(__('common.fields.lead_source'))
                                             ->relationship(

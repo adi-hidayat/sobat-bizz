@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\Enums\DocumentType;
-use App\Enums\LeadRating;
 use App\Enums\LeadStatus;
 use App\Enums\LeadType;
 use App\Models\Concerns\HasDocumentNumber;
@@ -36,7 +35,8 @@ class Lead extends Model
         'industry',
         'lead_source_id',
         'status',
-        'rating',
+        'lead_rating_id',
+        'board_position',
         'estimated_value',
         'expected_close_date',
         'assigned_to',
@@ -52,8 +52,8 @@ class Lead extends Model
         return [
             'lead_type' => LeadType::class,
             'status' => LeadStatus::class,
-            'rating' => LeadRating::class,
             'estimated_value' => 'decimal:2',
+            'board_position' => 'integer',
             'expected_close_date' => 'date',
             'follow_up_date' => 'date',
             'last_contacted_at' => 'datetime',
@@ -67,6 +67,22 @@ class Lead extends Model
     public function getDisplayNameAttribute(): string
     {
         return $this->company_name ?: ($this->contact_person ?: $this->lead_number);
+    }
+
+    protected static function booted(): void
+    {
+        static::creating(function (Lead $lead): void {
+            if ($lead->board_position) {
+                return;
+            }
+
+            $status = $lead->status;
+            $statusValue = $status instanceof LeadStatus ? $status->value : ($status ?? LeadStatus::New->value);
+
+            $lead->board_position = (int) static::query()
+                ->where('status', $statusValue)
+                ->max('board_position') + 1;
+        });
     }
 
     public function isCompany(): bool
@@ -92,6 +108,11 @@ class Lead extends Model
     public function leadSource(): BelongsTo
     {
         return $this->belongsTo(LeadSource::class);
+    }
+
+    public function rating(): BelongsTo
+    {
+        return $this->belongsTo(LeadRating::class, 'lead_rating_id');
     }
 
     public function contacts(): MorphMany

@@ -46,6 +46,12 @@ class User extends Authenticatable implements FilamentUser
         return $this->belongsTo(JobTitle::class);
     }
 
+    public function getAvatarUrlAttribute(): string
+    {
+        return $this->staff?->photo_url
+            ?? 'https://ui-avatars.com/api/?name='.urlencode($this->name).'&color=FFFFFF&background=09090b&format=svg';
+    }
+
     public function canAccessPanel(Panel $panel): bool
     {
         return $this->is_active;

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Leads;
 
+use App\Filament\Resources\Leads\Pages\BoardLeads;
 use App\Filament\Resources\Leads\Pages\CreateLead;
 use App\Filament\Resources\Leads\Pages\EditLead;
 use App\Filament\Resources\Leads\Pages\ListLeads;
@@ -72,6 +73,7 @@ class LeadResource extends Resource
         return [
             'index' => ListLeads::route('/'),
             'create' => CreateLead::route('/create'),
+            'board' => BoardLeads::route('/board'),
             'view' => ViewLead::route('/{record}'),
             'edit' => EditLead::route('/{record}/edit'),
         ];

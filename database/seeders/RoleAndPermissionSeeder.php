@@ -39,6 +39,7 @@ class RoleAndPermissionSeeder extends Seeder
         'department',
         'job_title',
         'lead_source',
+        'lead_rating',
         'tax',
         'region',
     ];

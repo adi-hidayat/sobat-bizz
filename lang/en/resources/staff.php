@@ -15,6 +15,7 @@ return [
         'employee_number' => 'Employee Number (NIP)',
         'department' => 'Department',
         'joined_at' => 'Join Date',
+        'photo' => 'Profile photo',
     ],
 
     'form' => [

@@ -49,10 +49,6 @@ class AdminPanelProvider extends PanelProvider
                 WelcomeWidget::class,
             ])
             ->renderHook(
-                PanelsRenderHook::FOOTER,
-                fn (): string => view('filament.footer.attribution')->render(),
-            )
-            ->renderHook(
                 PanelsRenderHook::USER_MENU_BEFORE,
                 fn (): string => view('filament.language-switcher')->render(),
             )

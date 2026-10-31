@@ -3,7 +3,6 @@
 use App\Actions\ConvertLeadToCustomer;
 use App\Enums\CustomerType;
 use App\Enums\LeadActivityType;
-use App\Enums\LeadRating;
 use App\Enums\LeadStatus;
 use App\Enums\LeadType;
 use App\Filament\Resources\Leads\Pages\CreateLead;
@@ -12,6 +11,7 @@ use App\Filament\Resources\Leads\Pages\ViewLead;
 use App\Filament\Resources\Leads\RelationManagers\ActivitiesRelationManager;
 use App\Models\Lead;
 use App\Models\LeadActivity;
+use App\Models\LeadRating;
 use App\Models\LeadSource;
 use App\Models\User;
 use Database\Seeders\RoleAndPermissionSeeder;
@@ -29,6 +29,10 @@ beforeEach(function (): void {
 
 it('membuat lead perorangan tanpa nama perusahaan', function () {
     $source = LeadSource::factory()->create();
+    $rating = LeadRating::query()->firstOrCreate(
+        ['name' => 'Hot'],
+        ['color' => 'danger'],
+    );
 
     livewire(CreateLead::class)
         ->fillForm([
@@ -38,7 +42,7 @@ it('membuat lead perorangan tanpa nama perusahaan', function () {
             'phone' => '081234567890',
             'lead_source_id' => $source->getKey(),
             'status' => LeadStatus::New->value,
-            'rating' => LeadRating::Hot->value,
+            'lead_rating_id' => $rating->getKey(),
             'estimated_value' => 5_000_000,
             'expected_close_date' => now()->addDays(10)->toDateString(),
         ])
@@ -52,7 +56,7 @@ it('membuat lead perorangan tanpa nama perusahaan', function () {
         ->and($lead->company_name)->toBeNull()
         ->and($lead->contact_person)->toBe('Rina Wijaya')
         ->and($lead->display_name)->toBe('Rina Wijaya')
-        ->and($lead->rating)->toBe(LeadRating::Hot)
+        ->and($lead->rating?->name)->toBe('Hot')
         ->and((float) $lead->estimated_value)->toBe(5_000_000.0)
         ->and($lead->expected_close_date)->not->toBeNull();
 });
@@ -137,6 +141,22 @@ it('menampilkan aktivitas pada halaman lead', function () {
     ])
         ->assertOk()
         ->assertCanSeeTableRecords([$activity]);
+});
+
+it('menyaring lead berdasarkan sales yang dipilih', function () {
+    $admin = User::factory()->create(['is_active' => true]);
+    $admin->assignRole('Administrator');
+
+    $other = User::factory()->create(['is_active' => true]);
+    $other->assignRole('Administrator');
+
+    $mine = Lead::factory()->assignedTo($admin)->create();
+    $theirs = Lead::factory()->assignedTo($other)->create();
+
+    livewire(ListLeads::class)
+        ->filterTable('assigned_to', ['value' => $admin->getKey()])
+        ->assertCanSeeTableRecords([$mine])
+        ->assertCanNotSeeTableRecords([$theirs]);
 });
 
 it('mengonversi lead perorangan menjadi customer perorangan beserta kontak utama', function () {

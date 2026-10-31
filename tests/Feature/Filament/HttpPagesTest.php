@@ -21,10 +21,12 @@ it('merender seluruh halaman index melalui http', function (string $path) {
 })->with([
     '/admin',
     '/admin/leads',
+    '/admin/leads/board',
     '/admin/customers',
     '/admin/suppliers',
     '/admin/products',
     '/admin/setup/product-categories',
+    '/admin/setup/lead-ratings',
     '/admin/setup/departments',
     '/admin/setup/job-titles',
     '/admin/proposals',
@@ -68,6 +70,16 @@ it('merender halaman detail melalui http', function () {
 
 it('mengarahkan root ke panel admin', function () {
     $this->get('/')->assertRedirect('/admin');
+});
+
+it('mengingat mode lead terakhir yang dibuka', function () {
+    $this->get('/admin/leads/board')->assertOk();
+
+    $this->get('/admin/leads')->assertRedirect('/admin/leads/board');
+
+    $this->get('/admin/leads?view=table')->assertOk();
+
+    $this->get('/admin/leads')->assertOk();
 });
 
 it('menampilkan grup sdm di sidebar', function () {

@@ -133,6 +133,14 @@ it('melarang staff menghapus datanya sendiri', function () {
         ->and($this->admin->can('deleteAny', Staff::class))->toBeFalse();
 });
 
+it('memakai foto profil atau avatar inisial pada daftar staff', function () {
+    $withPhoto = Staff::factory()->create(['photo_path' => 'staff-photos/budi.jpg']);
+    $withoutPhoto = Staff::factory()->create();
+
+    expect($withPhoto->avatar_url)->toContain('/storage/staff-photos/budi.jpg')
+        ->and($withoutPhoto->avatar_url)->toContain('ui-avatars.com');
+});
+
 it('menolak pengguna tanpa permission melihat data staff', function () {
     $user = User::factory()->create(['is_active' => true]);
 

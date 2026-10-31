@@ -2,10 +2,10 @@
 
 namespace Database\Factories;
 
-use App\Enums\LeadRating;
 use App\Enums\LeadStatus;
 use App\Enums\LeadType;
 use App\Models\Lead;
+use App\Models\LeadRating;
 use App\Models\LeadSource;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -33,7 +33,7 @@ class LeadFactory extends Factory
             'industry' => fake()->randomElement(['Teknologi', 'Manufaktur', 'Retail', 'Konstruksi', 'Perbankan']),
             'lead_source_id' => LeadSource::factory(),
             'status' => LeadStatus::New,
-            'rating' => fake()->randomElement([LeadRating::Hot, LeadRating::Warm, LeadRating::Cold]),
+            'lead_rating_id' => LeadRating::factory(),
             'estimated_value' => fake()->numberBetween(5_000_000, 100_000_000),
             'expected_close_date' => fake()->dateTimeBetween('now', '+2 months'),
             'follow_up_date' => fake()->dateTimeBetween('now', '+1 month'),
@@ -56,7 +56,13 @@ class LeadFactory extends Factory
 
     public function hot(): static
     {
-        return $this->state(fn (): array => ['rating' => LeadRating::Hot]);
+        return $this->state(fn (): array => [
+            'lead_rating_id' => LeadRating::query()->where('name', 'Hot')->value('id')
+                ?? LeadRating::factory()->create([
+                    'name' => 'Hot',
+                    'color' => 'danger',
+                ])->getKey(),
+        ]);
     }
 
     public function converted(): static

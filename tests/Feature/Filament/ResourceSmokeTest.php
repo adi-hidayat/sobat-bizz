@@ -9,6 +9,7 @@ use App\Filament\Resources\Districts\Pages\ListDistricts;
 use App\Filament\Resources\IncomingPos\Pages\ListIncomingPos;
 use App\Filament\Resources\Invoices\Pages\ListInvoices;
 use App\Filament\Resources\JobTitles\Pages\ListJobTitles;
+use App\Filament\Resources\LeadRatings\Pages\ListLeadRatings;
 use App\Filament\Resources\Leads\Pages\CreateLead;
 use App\Filament\Resources\Leads\Pages\ListLeads;
 use App\Filament\Resources\LeadSources\Pages\ListLeadSources;
@@ -58,6 +59,7 @@ it('merender halaman daftar utama', function (string $page) {
     ListPayments::class,
     ListStaff::class,
     ListLeadSources::class,
+    ListLeadRatings::class,
     ListTaxes::class,
     ListDepartments::class,
     ListJobTitles::class,

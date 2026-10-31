@@ -60,8 +60,38 @@ return [
     ],
 
     'actions' => [
+        'pipeline' => 'Pipeline',
+        'table' => 'Table',
+        'create' => 'Add Lead',
         'convert' => 'Convert to Customer',
         'convert_description' => 'The lead will be marked as Converted and a new customer will be created from this lead data.',
+    ],
+
+    'board' => [
+        'title' => 'Lead Pipeline',
+        'search_placeholder' => 'Search lead, contact, email, or phone...',
+        'clear_search' => 'Clear search',
+        'all_sales' => 'All sales',
+        'all_sources' => 'All sources',
+        'all_ratings' => 'All ratings',
+        'all_types' => 'All types',
+        'you_option' => ':name (You)',
+        'empty_column' => 'No leads yet.',
+        'unassigned' => 'Unassigned',
+        'move' => 'Move to',
+        'lost_reason_title' => 'Lost / unqualified reason',
+        'lost_reason_help' => 'Provide a reason before moving the lead to this status.',
+        'lost_reason_placeholder' => 'Example: no budget yet, chose a competitor, etc.',
+        'errors' => [
+            'conversion_blocked' => 'Conversion can only be done through the Convert to Customer action.',
+            'lost_reason_required' => 'A reason is required for the Lost or Unqualified status.',
+        ],
+        'notifications' => [
+            'moved' => ':lead moved to :status.',
+            'reordered' => ':lead order updated.',
+            'not_found' => 'Lead not found.',
+            'invalid_status' => 'Invalid status.',
+        ],
     ],
 
     'notifications' => [

@@ -3,13 +3,14 @@
 namespace App\Filament\Resources\Leads\Tables;
 
 use App\Actions\ConvertLeadToCustomer;
-use App\Enums\LeadRating;
 use App\Enums\LeadStatus;
 use App\Enums\LeadType;
 use App\Filament\Actions\TableActions;
 use App\Filament\Resources\Customers\CustomerResource;
 use App\Filament\Resources\Leads\LeadResource;
+use App\Filament\Support\UserAvatar;
 use App\Models\Lead;
+use App\Models\User;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -17,6 +18,7 @@ use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\ViewAction;
+use Filament\Forms\Components\Select;
 use Filament\Notifications\Notification;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
@@ -53,9 +55,10 @@ class LeadsTable
                 TextColumn::make('job_title')
                     ->label(__('common.fields.job_title'))
                     ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('rating')
+                TextColumn::make('rating.name')
                     ->label(__('resources/lead.fields.rating'))
-                    ->badge(),
+                    ->badge()
+                    ->color(fn (Lead $record): string => $record->rating?->color ?? 'gray'),
                 TextColumn::make('estimated_value')
                     ->label(__('resources/lead.fields.estimated_value'))
                     ->money('IDR')
@@ -93,18 +96,43 @@ class LeadsTable
                 SelectFilter::make('lead_type')
                     ->label(__('resources/lead.fields.lead_type'))
                     ->options(LeadType::class),
-                SelectFilter::make('rating')
+                SelectFilter::make('lead_rating_id')
                     ->label(__('resources/lead.fields.rating'))
-                    ->options(LeadRating::class),
+                    ->relationship('rating', 'name'),
                 SelectFilter::make('status')
                     ->label(__('common.fields.status'))
                     ->options(LeadStatus::class),
                 SelectFilter::make('lead_source_id')
                     ->label(__('resources/lead.fields.source'))
                     ->relationship('leadSource', 'name'),
-                SelectFilter::make('assigned_to')
+                Filter::make('assigned_to')
                     ->label(__('resources/lead.fields.sales'))
-                    ->relationship('assignedSalesPerson', 'name'),
+                    ->form([
+                        Select::make('value')
+                            ->hiddenLabel()
+                            ->placeholder(__('resources/lead.fields.sales'))
+                            ->options(fn (): array => User::query()
+                                ->with('staff')
+                                ->orderBy('name')
+                                ->get()
+                                ->mapWithKeys(fn (User $user): array => [
+                                    $user->getKey() => UserAvatar::optionLabel($user),
+                                ])
+                                ->all())
+                            ->searchable()
+                            ->allowHtml(),
+                    ])
+                    ->indicateUsing(function (array $data): ?string {
+                        if (blank($data['value'] ?? null)) {
+                            return null;
+                        }
+
+                        return __('resources/lead.fields.sales').': '.(User::query()->whereKey($data['value'])->value('name') ?? $data['value']);
+                    })
+                    ->query(fn (Builder $query, array $data): Builder => $query->when(
+                        filled($data['value'] ?? null),
+                        fn (Builder $query): Builder => $query->where('assigned_to', $data['value']),
+                    )),
                 Filter::make('overdue_follow_up')
                     ->label(__('resources/lead.filters.overdue_follow_up'))
                     ->query(fn (Builder $query): Builder => $query->overdueFollowUp()),

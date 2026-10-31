@@ -6,6 +6,7 @@ use Database\Factories\StaffFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Storage;
 
 class Staff extends Model
 {
@@ -17,6 +18,7 @@ class Staff extends Model
         'employee_number',
         'department_id',
         'joined_at',
+        'photo_path',
     ];
 
     /**
@@ -29,6 +31,21 @@ class Staff extends Model
         return [
             'joined_at' => 'date',
         ];
+    }
+
+    public function getPhotoUrlAttribute(): ?string
+    {
+        if (blank($this->photo_path)) {
+            return null;
+        }
+
+        return Storage::disk('public')->url($this->photo_path);
+    }
+
+    public function getAvatarUrlAttribute(): string
+    {
+        return $this->photo_url
+            ?? 'https://ui-avatars.com/api/?name='.urlencode($this->user?->name ?? $this->employee_number).'&color=FFFFFF&background=09090b&format=svg';
     }
 
     protected static function booted(): void

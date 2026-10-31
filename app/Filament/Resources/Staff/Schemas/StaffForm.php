@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Staff\Schemas;
 
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -35,6 +36,15 @@ class StaffForm
                             ->preload(),
                         DatePicker::make('joined_at')
                             ->label(__('resources/staff.fields.joined_at')),
+                        FileUpload::make('photo_path')
+                            ->label(__('resources/staff.fields.photo'))
+                            ->image()
+                            ->avatar()
+                            ->disk('public')
+                            ->directory('staff-photos')
+                            ->maxSize(2048)
+                            ->imageEditor()
+                            ->columnSpanFull(),
                     ])
                     ->columns(2),
 

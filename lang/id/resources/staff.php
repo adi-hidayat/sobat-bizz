@@ -15,6 +15,7 @@ return [
         'employee_number' => 'Nomor Induk Pegawai (NIP)',
         'department' => 'Departemen',
         'joined_at' => 'Tanggal Masuk',
+        'photo' => 'Foto profil',
     ],
 
     'form' => [

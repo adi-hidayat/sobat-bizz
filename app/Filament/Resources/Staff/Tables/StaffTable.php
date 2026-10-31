@@ -6,6 +6,7 @@ use App\Filament\Actions\TableActions;
 use App\Models\JobTitle;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -18,14 +19,20 @@ class StaffTable
     {
         return $table
             ->columns([
-                TextColumn::make('employee_number')
-                    ->label(__('resources/staff.fields.employee_number'))
-                    ->searchable()
-                    ->sortable(),
+                ImageColumn::make('avatar_url')
+                    ->label(__('resources/staff.fields.photo'))
+                    ->circular()
+                    ->height(40)
+                    ->width(40),
                 TextColumn::make('user.name')
                     ->label(__('common.fields.name'))
                     ->searchable()
                     ->sortable(),
+                TextColumn::make('employee_number')
+                    ->label(__('resources/staff.fields.employee_number'))
+                    ->searchable()
+                    ->sortable()
+                    ->toggleable(),
                 TextColumn::make('user.email')
                     ->label(__('common.fields.email'))
                     ->searchable()
@@ -105,6 +112,7 @@ class StaffTable
             ])
             ->recordUrl(null)
             ->recordAction('view')
+            ->modifyQueryUsing(fn (Builder $query): Builder => $query->with(['user', 'department']))
             ->defaultSort('employee_number');
     }
 }

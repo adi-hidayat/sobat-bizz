@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Leads\Schemas;
 
+use App\Models\Lead;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
@@ -36,9 +37,10 @@ class LeadInfolist
                                     ->schema([
                                         TextEntry::make('leadSource.name')->label(__('resources/lead.fields.source'))->badge(),
                                         TextEntry::make('status')->label(__('common.fields.status'))->badge(),
-                                        TextEntry::make('rating')
+                                        TextEntry::make('rating.name')
                                             ->label(__('resources/lead.fields.rating'))
                                             ->badge()
+                                            ->color(fn (Lead $record): string => $record->rating?->color ?? 'gray')
                                             ->placeholder(__('common.placeholders.none')),
                                         TextEntry::make('estimated_value')->label(__('resources/lead.fields.estimated_value'))->money('IDR'),
                                         TextEntry::make('expected_close_date')

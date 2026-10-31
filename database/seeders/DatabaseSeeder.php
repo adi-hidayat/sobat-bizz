@@ -16,6 +16,8 @@ class DatabaseSeeder extends Seeder
             LeadSourceSeeder::class,
             TaxSeeder::class,
             MasterDataSeeder::class,
+            LeadRatingSeeder::class,
+            LeadSeeder::class,
             DemoPipelineSeeder::class,
         ]);
     }

@@ -2,14 +2,12 @@
 
 namespace App\Enums;
 
-use App\Enums\Concerns\HasEnumColor;
 use App\Enums\Concerns\HasEnumLabel;
 use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasLabel;
 
 enum LeadStatus: string implements HasColor, HasLabel
 {
-    use HasEnumColor;
     use HasEnumLabel;
 
     case New = 'new';
@@ -18,6 +16,18 @@ enum LeadStatus: string implements HasColor, HasLabel
     case Unqualified = 'unqualified';
     case Converted = 'converted';
     case Lost = 'lost';
+
+    public function getColor(): string|array|null
+    {
+        return match ($this) {
+            self::New => 'info',
+            self::Contacted => 'primary',
+            self::Qualified => 'success',
+            self::Unqualified => 'warning',
+            self::Converted => 'success',
+            self::Lost => 'danger',
+        };
+    }
 
     public function isConvertible(): bool
     {

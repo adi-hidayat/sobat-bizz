@@ -38,7 +38,7 @@ it('merender layout panel beserta sidebar navigasi', function () {
         ->assertSee('Penjualan')
         ->assertSee('Invoice')
         ->assertSee('Delivery Order')
-        ->assertSee('dr5hn')
+        ->assertDontSee('dr5hn')
         ->assertDontSee('Keuangan')
         ->assertDontSee('Fulfillment');
 });
