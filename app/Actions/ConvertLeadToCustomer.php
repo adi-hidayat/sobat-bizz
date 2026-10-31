@@ -3,7 +3,6 @@
 namespace App\Actions;
 
 use App\Enums\CustomerStatus;
-use App\Enums\CustomerType;
 use App\Enums\LeadStatus;
 use App\Models\Address;
 use App\Models\Customer;
@@ -29,11 +28,13 @@ final class ConvertLeadToCustomer
             $billingLine = $overrides['billing_address'] ?? $lead->address;
             $shippingLine = $overrides['shipping_address'] ?? $lead->address;
 
+            $companyName = $lead->company_name ?: ($lead->contact_person ?: $lead->lead_number);
+
             unset($overrides['billing_address'], $overrides['shipping_address']);
 
             $customer = Customer::query()->create(array_merge([
-                'company_name' => $lead->company_name,
-                'customer_type' => CustomerType::Company,
+                'company_name' => $companyName,
+                'customer_type' => $lead->lead_type->toCustomerType(),
                 'email' => $lead->email,
                 'phone' => $lead->phone,
                 'status' => CustomerStatus::Active,
@@ -57,16 +58,30 @@ final class ConvertLeadToCustomer
                 ]);
             }
 
-            $lead->contacts()->get()->each(function ($contact) use ($customer): void {
-                $customer->contacts()->create($contact->only([
-                    'name',
-                    'position',
-                    'email',
-                    'phone',
-                    'is_primary',
-                    'notes',
-                ]));
-            });
+            $contacts = $lead->contacts()->get();
+
+            if ($contacts->isEmpty()) {
+                if (filled($lead->contact_person)) {
+                    $customer->contacts()->create([
+                        'name' => $lead->contact_person,
+                        'position' => $lead->job_title,
+                        'email' => $lead->email,
+                        'phone' => $lead->phone,
+                        'is_primary' => true,
+                    ]);
+                }
+            } else {
+                $contacts->each(function ($contact) use ($customer): void {
+                    $customer->contacts()->create($contact->only([
+                        'name',
+                        'position',
+                        'email',
+                        'phone',
+                        'is_primary',
+                        'notes',
+                    ]));
+                });
+            }
 
             $lead->forceFill([
                 'status' => LeadStatus::Converted,

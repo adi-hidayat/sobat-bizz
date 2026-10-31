@@ -3,7 +3,9 @@
 namespace App\Filament\Resources\Leads\Tables;
 
 use App\Actions\ConvertLeadToCustomer;
+use App\Enums\LeadRating;
 use App\Enums\LeadStatus;
+use App\Enums\LeadType;
 use App\Filament\Actions\TableActions;
 use App\Filament\Resources\Customers\CustomerResource;
 use App\Filament\Resources\Leads\LeadResource;
@@ -17,9 +19,11 @@ use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\ViewAction;
 use Filament\Notifications\Notification;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class LeadsTable
 {
@@ -31,13 +35,31 @@ class LeadsTable
                     ->label(__('common.fields.number'))
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('company_name')
-                    ->label(__('resources/lead.fields.company'))
-                    ->searchable()
-                    ->sortable(),
-                TextColumn::make('contact_person')
-                    ->label(__('resources/lead.fields.contact_person'))
-                    ->searchable()
+                TextColumn::make('display_name')
+                    ->label(__('resources/lead.fields.lead'))
+                    ->searchable(query: fn (Builder $query, string $search): Builder => $query->where(
+                        fn (Builder $query): Builder => $query
+                            ->where('company_name', 'like', "%{$search}%")
+                            ->orWhere('contact_person', 'like', "%{$search}%")
+                            ->orWhere('lead_number', 'like', "%{$search}%"),
+                    ))
+                    ->sortable(query: fn (Builder $query, string $direction): Builder => $query->orderByRaw(
+                        'coalesce(company_name, contact_person) '.($direction === 'desc' ? 'desc' : 'asc'),
+                    )),
+                TextColumn::make('lead_type')
+                    ->label(__('resources/lead.fields.lead_type'))
+                    ->badge()
+                    ->toggleable(),
+                TextColumn::make('job_title')
+                    ->label(__('common.fields.job_title'))
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('rating')
+                    ->label(__('resources/lead.fields.rating'))
+                    ->badge(),
+                TextColumn::make('estimated_value')
+                    ->label(__('resources/lead.fields.estimated_value'))
+                    ->money('IDR')
+                    ->sortable()
                     ->toggleable(),
                 TextColumn::make('leadSource.name')
                     ->label(__('resources/lead.fields.source'))
@@ -55,6 +77,12 @@ class LeadsTable
                     ->date('d M Y')
                     ->sortable()
                     ->color(fn (Lead $record): ?string => $record->follow_up_date?->isPast() ? 'danger' : null),
+                TextColumn::make('last_contacted_at')
+                    ->label(__('resources/lead.fields.last_contacted_at'))
+                    ->dateTime('d M Y H:i')
+                    ->placeholder(__('common.placeholders.none'))
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('created_at')
                     ->label(__('common.fields.created_at'))
                     ->dateTime('d M Y H:i')
@@ -62,6 +90,12 @@ class LeadsTable
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
+                SelectFilter::make('lead_type')
+                    ->label(__('resources/lead.fields.lead_type'))
+                    ->options(LeadType::class),
+                SelectFilter::make('rating')
+                    ->label(__('resources/lead.fields.rating'))
+                    ->options(LeadRating::class),
                 SelectFilter::make('status')
                     ->label(__('common.fields.status'))
                     ->options(LeadStatus::class),
@@ -71,6 +105,9 @@ class LeadsTable
                 SelectFilter::make('assigned_to')
                     ->label(__('resources/lead.fields.sales'))
                     ->relationship('assignedSalesPerson', 'name'),
+                Filter::make('overdue_follow_up')
+                    ->label(__('resources/lead.filters.overdue_follow_up'))
+                    ->query(fn (Builder $query): Builder => $query->overdueFollowUp()),
                 TrashedFilter::make(),
             ])
             ->recordActions([

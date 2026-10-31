@@ -64,6 +64,25 @@ return [
         'lost' => 'Lost',
     ],
 
+    'lead_type' => [
+        'company' => 'Company',
+        'individual' => 'Individual',
+    ],
+
+    'lead_rating' => [
+        'hot' => 'Hot',
+        'warm' => 'Warm',
+        'cold' => 'Cold',
+    ],
+
+    'lead_activity_type' => [
+        'call' => 'Call',
+        'email' => 'Email',
+        'meeting' => 'Meeting',
+        'note' => 'Note',
+        'task' => 'Task',
+    ],
+
     'payment_method' => [
         'cash' => 'Cash',
         'bank_transfer' => 'Bank Transfer',

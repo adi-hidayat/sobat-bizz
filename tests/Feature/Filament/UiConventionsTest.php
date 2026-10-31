@@ -45,7 +45,7 @@ it('membuka detail baris dalam slide over dengan tab', function () {
 
     livewire(ListLeads::class)
         ->mountTableAction('view', $lead->getKey())
-        ->assertMountedActionModalSee(['Informasi Lead', 'Kontak & Alamat']);
+        ->assertMountedActionModalSee(['Identitas Lead', 'Kualifikasi & Follow-up', 'Kontak & Alamat']);
 });
 
 it('memisahkan form dengan beberapa informasi menjadi tab', function () {

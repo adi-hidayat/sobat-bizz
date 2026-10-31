@@ -64,6 +64,25 @@ return [
         'lost' => 'Hilang',
     ],
 
+    'lead_type' => [
+        'company' => 'Perusahaan',
+        'individual' => 'Perorangan',
+    ],
+
+    'lead_rating' => [
+        'hot' => 'Panas',
+        'warm' => 'Hangat',
+        'cold' => 'Dingin',
+    ],
+
+    'lead_activity_type' => [
+        'call' => 'Telepon',
+        'email' => 'Email',
+        'meeting' => 'Meeting',
+        'note' => 'Catatan',
+        'task' => 'Tugas',
+    ],
+
     'payment_method' => [
         'cash' => 'Tunai',
         'bank_transfer' => 'Transfer bank',

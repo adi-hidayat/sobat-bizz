@@ -2,7 +2,9 @@
 
 namespace Database\Factories;
 
+use App\Enums\LeadRating;
 use App\Enums\LeadStatus;
+use App\Enums\LeadType;
 use App\Models\Lead;
 use App\Models\LeadSource;
 use App\Models\User;
@@ -21,22 +23,40 @@ class LeadFactory extends Factory
     public function definition(): array
     {
         return [
+            'lead_type' => LeadType::Company,
             'company_name' => fake()->company(),
             'contact_person' => fake()->name(),
+            'job_title' => fake()->jobTitle(),
             'email' => fake()->unique()->companyEmail(),
             'phone' => fake()->numerify('08##########'),
             'address' => fake()->address(),
             'industry' => fake()->randomElement(['Teknologi', 'Manufaktur', 'Retail', 'Konstruksi', 'Perbankan']),
             'lead_source_id' => LeadSource::factory(),
             'status' => LeadStatus::New,
+            'rating' => fake()->randomElement([LeadRating::Hot, LeadRating::Warm, LeadRating::Cold]),
+            'estimated_value' => fake()->numberBetween(5_000_000, 100_000_000),
+            'expected_close_date' => fake()->dateTimeBetween('now', '+2 months'),
             'follow_up_date' => fake()->dateTimeBetween('now', '+1 month'),
             'notes' => fake()->optional()->sentence(),
         ];
     }
 
+    public function individual(): static
+    {
+        return $this->state(fn (): array => [
+            'lead_type' => LeadType::Individual,
+            'company_name' => null,
+        ]);
+    }
+
     public function qualified(): static
     {
         return $this->state(fn (): array => ['status' => LeadStatus::Qualified]);
+    }
+
+    public function hot(): static
+    {
+        return $this->state(fn (): array => ['rating' => LeadRating::Hot]);
     }
 
     public function converted(): static
