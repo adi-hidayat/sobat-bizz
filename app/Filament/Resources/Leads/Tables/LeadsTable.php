@@ -57,11 +57,15 @@ class LeadsTable
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('rating.name')
                     ->label(__('resources/lead.fields.rating'))
-                    ->badge()
-                    ->color(fn (Lead $record): string => $record->rating?->color ?? 'gray'),
+                    ->formatStateUsing(fn (?string $state, Lead $record): string => view(
+                        'filament.partials.lead-rating-badge',
+                        ['rating' => $record->rating],
+                    )->render())
+                    ->html(),
                 TextColumn::make('estimated_value')
                     ->label(__('resources/lead.fields.estimated_value'))
                     ->money('IDR')
+                    ->prefix('~')
                     ->sortable()
                     ->toggleable(),
                 TextColumn::make('leadSource.name')

@@ -15,9 +15,26 @@ class LeadRatingInfolist
                 TextEntry::make('name')->label(__('common.fields.name')),
                 TextEntry::make('color')
                     ->label(__('resources/lead_rating.fields.color'))
-                    ->badge()
-                    ->formatStateUsing(fn (string $state): string => __('resources/lead_rating.colors.'.$state))
-                    ->color(fn (LeadRating $record): string => $record->color),
+                    ->formatStateUsing(fn (string $state, LeadRating $record): string => view(
+                        'filament.partials.color-badge',
+                        [
+                            'label' => $state,
+                            'background' => $record->color,
+                            'textColor' => $record->text_color,
+                        ],
+                    )->render())
+                    ->html(),
+                TextEntry::make('text_color')
+                    ->label(__('resources/lead_rating.fields.text_color'))
+                    ->formatStateUsing(fn (string $state): string => view(
+                        'filament.partials.color-badge',
+                        [
+                            'label' => $state,
+                            'background' => $state,
+                            'textColor' => '#ffffff',
+                        ],
+                    )->render())
+                    ->html(),
                 TextEntry::make('leads_count')
                     ->label(__('resources/lead_rating.fields.leads_count'))
                     ->state(fn (LeadRating $record): int => $record->leads()->count()),

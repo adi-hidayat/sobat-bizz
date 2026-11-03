@@ -35,7 +35,7 @@ class LeadSeeder extends Seeder
 
             for ($index = 1; $index <= $count; $index++) {
                 $isCompany = fake()->boolean(70);
-                $requiresLostReason = in_array($status, [LeadStatus::Lost, LeadStatus::Unqualified], true);
+                $requiresLostReason = $status === LeadStatus::Lost;
 
                 $lead = Lead::query()->firstOrCreate(
                     ['email' => sprintf('seed-%s-%02d@example.test', $status->value, $index)],

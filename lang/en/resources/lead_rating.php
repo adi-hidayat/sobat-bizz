@@ -11,16 +11,8 @@ return [
 
     'fields' => [
         'color' => 'Color',
+        'text_color' => 'Text color',
         'leads_count' => 'Lead count',
-    ],
-
-    'colors' => [
-        'gray' => 'Gray',
-        'primary' => 'Primary',
-        'info' => 'Info',
-        'success' => 'Success',
-        'warning' => 'Warning',
-        'danger' => 'Danger',
     ],
 
 ];

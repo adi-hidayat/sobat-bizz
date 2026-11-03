@@ -59,9 +59,8 @@ return [
         'new' => 'Baru',
         'contacted' => 'Dihubungi',
         'qualified' => 'Berkualitas',
-        'unqualified' => 'Tidak berkualitas',
-        'converted' => 'Terkonversi',
-        'lost' => 'Hilang',
+        'converted' => 'Menang',
+        'lost' => 'Kalah',
     ],
 
     'lead_type' => [

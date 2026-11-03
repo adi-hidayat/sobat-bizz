@@ -24,9 +24,27 @@ class LeadRatingsTable
                     ->sortable(),
                 TextColumn::make('color')
                     ->label(__('resources/lead_rating.fields.color'))
-                    ->badge()
-                    ->formatStateUsing(fn (string $state): string => __('resources/lead_rating.colors.'.$state))
-                    ->color(fn (LeadRating $record): string => $record->color),
+                    ->formatStateUsing(fn (string $state, LeadRating $record): string => view(
+                        'filament.partials.color-badge',
+                        [
+                            'label' => $state,
+                            'background' => $record->color,
+                            'textColor' => $record->text_color,
+                        ],
+                    )->render())
+                    ->html(),
+                TextColumn::make('text_color')
+                    ->label(__('resources/lead_rating.fields.text_color'))
+                    ->formatStateUsing(fn (string $state): string => view(
+                        'filament.partials.color-badge',
+                        [
+                            'label' => $state,
+                            'background' => $state,
+                            'textColor' => '#ffffff',
+                        ],
+                    )->render())
+                    ->html()
+                    ->toggleable(),
                 TextColumn::make('description')
                     ->label(__('common.fields.description'))
                     ->limit(60)

@@ -31,12 +31,28 @@
         }
 
         .lead-board-toolbar {
-            display: block;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
             padding: 0.75rem;
             background: var(--lb-card);
             border: 1px solid var(--lb-border);
             border-radius: 0.75rem;
             container-type: inline-size;
+        }
+
+        .lead-board-toolbar-filters {
+            flex: 1 1 auto;
+            min-width: 0;
+        }
+
+        .lead-board-card-fields-toggle {
+            flex: none;
+            margin-top: 0;
+        }
+
+        .lead-card-fields-action-hidden {
+            display: none !important;
         }
 
         .lead-board-toolbar .fi-sc {
@@ -94,7 +110,7 @@
 
         .lead-board-columns {
             display: grid;
-            grid-template-columns: repeat(6, minmax(0, 1fr));
+            grid-template-columns: repeat(5, minmax(0, 1fr));
             gap: 0.75rem;
             align-items: stretch;
             height: calc(100dvh - 19.5rem);
@@ -131,12 +147,12 @@
             background: var(--lb-bg);
             overflow: hidden;
             transition: outline-color 120ms ease, background-color 120ms ease;
-            outline: 2px dashed transparent;
+            outline: 2px solid transparent;
         }
 
         .lead-board-column.is-drag-over {
-            outline-color: var(--lb-primary);
-            background: color-mix(in srgb, var(--lb-primary) 8%, var(--lb-bg));
+            outline-color: var(--lb-status, var(--lb-primary));
+            background: color-mix(in srgb, var(--lb-status, var(--lb-primary)) 8%, var(--lb-bg));
         }
 
         .lead-board-column-header {
@@ -193,15 +209,33 @@
         }
 
         .lead-board-card.is-dragging {
-            opacity: 0.35;
+            opacity: 0.45;
+            outline: 2px solid var(--lb-primary);
+            outline-offset: -2px;
+            cursor: grabbing;
+            animation: lead-board-drag-flash 1.1s ease-in-out infinite;
+        }
+
+        @keyframes lead-board-drag-flash {
+            0%,
+            100% {
+                outline-color: var(--lb-status, var(--lb-primary));
+            }
+
+            50% {
+                outline-color: color-mix(in srgb, var(--lb-status, var(--lb-primary)) 15%, transparent);
+            }
         }
 
         .lead-board-drop-slot {
             flex: none;
-            border: 2px dashed var(--lb-primary);
+            border: none;
+            outline: 2px solid var(--lb-status, var(--lb-primary));
+            outline-offset: -2px;
             border-radius: 0.5rem;
-            background: color-mix(in srgb, var(--lb-primary) 8%, transparent);
+            background: color-mix(in srgb, var(--lb-status, var(--lb-primary)) 8%, transparent);
             pointer-events: none;
+            animation: lead-board-drag-flash 1.1s ease-in-out infinite;
         }
 
         .lead-board-card-top {
@@ -224,19 +258,10 @@
             text-decoration: underline;
         }
 
-        .lead-board-rating {
-            flex: none;
-            padding: 0.0625rem 0.375rem;
-            border-radius: 9999px;
-            font-size: 0.625rem;
-            font-weight: 600;
-            color: #fff;
-            background: var(--lb-rating, #9ca3af);
-        }
-
         .lead-board-card-meta {
             display: flex;
             flex-wrap: wrap;
+            align-items: center;
             gap: 0.375rem;
             font-size: 0.6875rem;
             color: var(--lb-muted);
@@ -250,11 +275,10 @@
 
         .lead-board-card-footer {
             display: flex;
+            flex-direction: column;
             align-items: flex-start;
-            justify-content: space-between;
-            gap: 0.5rem;
+            gap: 0.25rem;
             padding-top: 0.375rem;
-            border-top: 1px solid var(--lb-border);
             font-size: 0.6875rem;
             color: var(--lb-muted);
         }
@@ -291,7 +315,7 @@
         .lead-board-follow-up {
             display: flex;
             flex-direction: column;
-            align-items: flex-end;
+            align-items: flex-start;
             gap: 0.125rem;
             flex: none;
         }
@@ -365,9 +389,17 @@
             margin: 0;
             min-height: 6rem;
             padding: 0.5rem;
-            border: 1px dashed var(--lb-border);
+            border: 1px solid var(--lb-border);
             border-radius: 0.5rem;
             font-size: 0.6875rem;
+            color: var(--lb-muted);
+            text-align: center;
+        }
+
+        .lead-board-load-more {
+            margin: 0;
+            padding: 0.25rem;
+            font-size: 0.625rem;
             color: var(--lb-muted);
             text-align: center;
         }
@@ -451,6 +483,13 @@
             dragTarget: null,
             dropIndex: null,
             dropSlot: null,
+            dragGhost: null,
+            dragOffsetX: 0,
+            dragOffsetY: 0,
+            dragLastX: 0,
+            dragDirection: 0,
+            dragMoveHandler: null,
+            loadingColumns: {},
             pending: null,
             lostReason: '',
             tooltip: { show: false, text: '', x: 0, y: 0 },
@@ -478,12 +517,118 @@
                 this.draggingId = id;
                 this.dropIndex = null;
 
-                if (event?.dataTransfer) {
-                    event.dataTransfer.effectAllowed = 'move';
-                    event.dataTransfer.setData('text/plain', String(id));
+                if (! event?.dataTransfer) { return }
+
+                event.dataTransfer.effectAllowed = 'move';
+                event.dataTransfer.setData('text/plain', String(id));
+
+                const card = event.currentTarget;
+                const rect = card.getBoundingClientRect();
+                const ghost = card.cloneNode(true);
+
+                ghost.setAttribute('x-ignore', '');
+                ghost.classList.remove('is-dragging');
+
+                const boardStyles = getComputedStyle(card.closest('.lead-board'));
+
+                ['--lb-bg', '--lb-column', '--lb-card', '--lb-border', '--lb-text', '--lb-muted', '--lb-primary'].forEach((name) => {
+                    const value = boardStyles.getPropertyValue(name);
+
+                    if (value) {
+                        ghost.style.setProperty(name, value);
+                    }
+                });
+
+                const cardStyles = getComputedStyle(card);
+
+                ghost.style.background = cardStyles.backgroundColor;
+                ghost.style.borderColor = cardStyles.borderColor;
+                ghost.style.position = 'fixed';
+                ghost.style.left = rect.left + 'px';
+                ghost.style.top = rect.top + 'px';
+                ghost.style.width = rect.width + 'px';
+                ghost.style.margin = '0';
+                ghost.style.pointerEvents = 'none';
+                ghost.style.zIndex = '9999';
+                ghost.style.opacity = '1';
+                ghost.style.transform = 'rotate(0deg) scale(1.01)';
+                ghost.style.transformOrigin = 'center center';
+                ghost.style.transition = 'transform 300ms cubic-bezier(0.22, 1, 0.36, 1)';
+                ghost.style.willChange = 'transform';
+                ghost.style.boxShadow = '0 12px 28px rgb(0 0 0 / 0.28)';
+
+                document.body.appendChild(ghost);
+
+                this.dragGhost = ghost;
+                this.dragOffsetX = event.clientX - rect.left;
+                this.dragOffsetY = event.clientY - rect.top;
+                this.dragLastX = event.clientX;
+                this.dragDirection = 0;
+
+                this.dragMoveHandler = (moveEvent) => {
+                    if (! moveEvent.clientX && ! moveEvent.clientY) { return }
+
+                    this.moveGhost(moveEvent.clientX, moveEvent.clientY);
+                };
+
+                window.addEventListener('drag', this.dragMoveHandler);
+
+                const transparentPixel = new Image();
+                transparentPixel.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+                event.dataTransfer.setDragImage(transparentPixel, 0, 0);
+            },
+            moveGhost(x, y) {
+                if (! this.dragGhost) { return }
+
+                const deltaX = x - this.dragLastX;
+                this.dragLastX = x;
+
+                this.dragGhost.style.left = (x - this.dragOffsetX) + 'px';
+                this.dragGhost.style.top = (y - this.dragOffsetY) + 'px';
+
+                if (Math.abs(deltaX) < 3) { return }
+
+                const direction = deltaX > 0 ? 1 : -1;
+
+                if (direction === this.dragDirection) { return }
+
+                this.dragDirection = direction;
+                this.dragGhost.style.transform = 'rotate(' + (direction * 5) + 'deg) scale(1.01)';
+            },
+            cleanupDragGhost() {
+                if (this.dragMoveHandler) {
+                    window.removeEventListener('drag', this.dragMoveHandler);
+                    this.dragMoveHandler = null;
+                }
+
+                this.dragGhost?.remove();
+                this.dragGhost = null;
+            },
+            onColumnScroll(status, event, hasMore, livewire) {
+                if (! hasMore) { return }
+
+                const element = event.currentTarget;
+
+                if ((element.scrollTop + element.clientHeight) < (element.scrollHeight - 32)) { return }
+
+                if (this.loadingColumns[status]) { return }
+
+                this.loadingColumns[status] = true;
+
+                const finish = () => {
+                    this.loadingColumns[status] = false;
+                };
+
+                const request = livewire.loadMoreLeads(status);
+
+                if (request?.finally) {
+                    request.finally(finish);
+                } else {
+                    finish();
                 }
             },
             endDrag() {
+                this.cleanupDragGhost();
                 this.draggingId = null;
                 this.dragTarget = null;
                 this.dropIndex = null;
@@ -497,6 +642,11 @@
             },
             dragOver(status, event) {
                 if (! this.draggingId) { return }
+
+                if ((this.dragTarget !== status) && this.dragGhost) {
+                    this.dragDirection = 0;
+                    this.dragGhost.style.transform = 'rotate(0deg) scale(1.01)';
+                }
 
                 this.dragTarget = status;
 
@@ -540,12 +690,13 @@
                 const id = this.draggingId;
                 const position = this.dropIndex;
 
+                this.cleanupDragGhost();
                 this.draggingId = null;
                 this.dragTarget = null;
                 this.dropIndex = null;
                 this.hideDropSlot();
 
-                if (status === 'lost' || status === 'unqualified') {
+                if (status === 'lost') {
                     this.pending = { id: id, status: status, position: position };
                     this.lostReason = '';
 
@@ -557,7 +708,17 @@
         }"
     >
         <div class="lead-board-toolbar">
-            {{ $this->form }}
+            <div class="lead-board-toolbar-filters">
+                {{ $this->form }}
+            </div>
+
+            <x-filament::button
+                :tooltip="__('resources/lead.board.card_fields')"
+                icon="heroicon-o-view-columns"
+                color="gray"
+                wire:click="openCardFields"
+                class="lead-board-card-fields-toggle"
+            />
         </div>
 
         @php
@@ -574,6 +735,7 @@
                 <section
                     wire:key="lead-board-column-{{ $statusValue }}"
                     class="lead-board-column"
+                    style="--lb-status: {{ $this->statusColor($status) }};"
                     x-bind:class="dragTarget === '{{ $statusValue }}' ? 'is-drag-over' : ''"
                     x-on:dragover.prevent="dragOver('{{ $statusValue }}', $event)"
                     x-on:dragleave="dragLeave('{{ $statusValue }}', $event)"
@@ -589,7 +751,10 @@
                         </div>
                     </header>
 
-                    <div class="lead-board-cards">
+                    <div
+                        class="lead-board-cards"
+                        x-on:scroll.passive="onColumnScroll('{{ $statusValue }}', $event, {{ $column['has_more'] ? 'true' : 'false' }}, $wire)"
+                    >
                         @forelse ($column['leads'] as $lead)
                             <article
                                 wire:key="lead-card-{{ $lead->getKey() }}"
@@ -597,122 +762,148 @@
                                 draggable="{{ $lead->status === LeadStatus::Converted ? 'false' : 'true' }}"
                                 style="
                                     --lb-accent: {{ $this->statusColor($lead->status) }};
-                                    background: color-mix(in srgb, var(--lb-accent) 12%, var(--lb-card));
-                                    border-color: color-mix(in srgb, var(--lb-accent) 30%, var(--lb-border));
+                                    background: {{ $lead->status === LeadStatus::New ? 'var(--lb-card)' : 'color-mix(in srgb, var(--lb-accent) 12%, var(--lb-card))' }};
+                                    border-color: {{ $lead->status === LeadStatus::New ? 'var(--lb-border)' : 'color-mix(in srgb, var(--lb-accent) 30%, var(--lb-border))' }};
                                 "
                                 x-bind:class="draggingId === {{ $lead->getKey() }} ? 'is-dragging' : ''"
                                 x-on:dragstart="startDrag({{ $lead->getKey() }}, $event)"
                                 x-on:dragend="endDrag()"
                             >
-                                <div class="lead-board-card-top">
-                                    <a
-                                        href="{{ LeadResource::getUrl('view', ['record' => $lead]) }}"
-                                        class="lead-board-card-title"
-                                    >
-                                        {{ $lead->display_name }}
-                                    </a>
+                                @if ($this->showCardField('name') || ($this->showCardField('rating') && $lead->rating))
+                                    <div class="lead-board-card-top">
+                                        @if ($this->showCardField('name'))
+                                            <a
+                                                href="{{ LeadResource::getUrl('view', ['record' => $lead]) }}"
+                                                class="lead-board-card-title"
+                                            >
+                                                {{ $lead->display_name }}
+                                            </a>
+                                        @endif
 
-                                    @if ($lead->rating)
-                                        <span
-                                            class="lead-board-rating"
-                                            style="--lb-rating: {{ $this->ratingColor($lead->rating) }}"
-                                        >
-                                            {{ $lead->rating->name }}
-                                        </span>
-                                    @endif
-                                </div>
-
-                                <div class="lead-board-card-meta">
-                                    <span>{{ $lead->lead_type->getLabel() }}</span>
-
-                                    @if ($lead->leadSource)
-                                        <span>&middot; {{ $lead->leadSource->name }}</span>
-                                    @endif
-                                </div>
-
-                                @if ((float) $lead->estimated_value > 0)
-                                    <div class="lead-board-card-value">
-                                        Rp {{ number_format((float) $lead->estimated_value, 0, ',', '.') }}
+                                        @if ($this->showCardField('rating') && $lead->rating)
+                                            <x-filament::badge
+                                                size="sm"
+                                                style="background-color: {{ $lead->rating->color }}; color: {{ $lead->rating->text_color ?: '#ffffff' }};"
+                                            >
+                                                {{ $lead->rating->name }}
+                                            </x-filament::badge>
+                                        @endif
                                     </div>
                                 @endif
 
-                                <div class="lead-board-card-footer">
-                                    <div class="lead-board-card-people">
-                                        <div class="lead-board-person">
-                                            <span class="lead-board-person-label">
-                                                {{ __('resources/lead.fields.sales_person') }}
-                                            </span>
+                                @if ($this->showCardField('type') || ($this->showCardField('source') && $lead->leadSource))
+                                    <div class="lead-board-card-meta">
+                                        @if ($this->showCardField('type'))
+                                            <x-filament::badge color="primary" size="sm">
+                                                {{ $lead->lead_type->getLabel() }}
+                                            </x-filament::badge>
+                                        @endif
 
-                                            @if ($lead->assignedSalesPerson)
-                                                <div class="lead-board-team">
-                                                    <span
-                                                        class="lead-board-team-avatar-wrap"
-                                                        data-name="{{ $lead->assignedSalesPerson->name }}"
-                                                        x-on:mouseenter="showTooltip($event, $event.currentTarget.dataset.name)"
-                                                        x-on:mouseleave="hideTooltip()"
-                                                    >
-                                                        <img
-                                                            src="{{ $lead->assignedSalesPerson->avatar_url }}"
-                                                            alt="{{ $lead->assignedSalesPerson->name }}"
-                                                            class="lead-board-team-avatar"
-                                                        />
-                                                    </span>
-                                                </div>
-                                            @else
-                                                <span class="lead-board-person-value">-</span>
-                                            @endif
-                                        </div>
-
-                                        <div class="lead-board-person">
-                                            <span class="lead-board-person-label">
-                                                {{ __('resources/lead.fields.sales_team') }}
-                                            </span>
-
-                                            @if ($lead->salesTeam->isNotEmpty())
-                                                <div class="lead-board-team">
-                                                    @foreach ($lead->salesTeam->take(3) as $member)
-                                                        <span
-                                                            class="lead-board-team-avatar-wrap"
-                                                            data-name="{{ $member->name }}"
-                                                            x-on:mouseenter="showTooltip($event, $event.currentTarget.dataset.name)"
-                                                            x-on:mouseleave="hideTooltip()"
-                                                        >
-                                                            <img
-                                                                src="{{ $member->avatar_url }}"
-                                                                alt="{{ $member->name }}"
-                                                                class="lead-board-team-avatar"
-                                                            />
-                                                        </span>
-                                                    @endforeach
-
-                                                    @if ($lead->salesTeam->count() > 3)
-                                                        <span
-                                                            class="lead-board-team-more"
-                                                            data-name="{{ $lead->salesTeam->skip(3)->pluck('name')->implode(', ') }}"
-                                                            x-on:mouseenter="showTooltip($event, $event.currentTarget.dataset.name)"
-                                                            x-on:mouseleave="hideTooltip()"
-                                                        >
-                                                            +{{ $lead->salesTeam->count() - 3 }}
-                                                        </span>
-                                                    @endif
-                                                </div>
-                                            @else
-                                                <span class="lead-board-person-value">{{ __('common.placeholders.none') }}</span>
-                                            @endif
-                                        </div>
+                                        @if ($this->showCardField('source') && $lead->leadSource)
+                                            <x-filament::badge color="info" size="sm">
+                                                {{ $lead->leadSource->name }}
+                                            </x-filament::badge>
+                                        @endif
                                     </div>
+                                @endif
 
-                                    @if ($lead->follow_up_date)
-                                        <div class="lead-board-follow-up">
-                                            <span class="lead-board-person-label">
-                                                {{ __('resources/lead.fields.follow_up') }}
-                                            </span>
-                                            <span class="lead-board-person-value {{ $lead->follow_up_date->isPast() ? 'is-overdue' : '' }}">
-                                                {{ $lead->follow_up_date->format('d M Y') }}
-                                            </span>
-                                        </div>
-                                    @endif
-                                </div>
+                                @if ($this->showCardField('value') && (float) $lead->estimated_value > 0)
+                                    <div class="lead-board-card-value">
+                                        ~Rp {{ number_format((float) $lead->estimated_value, 0, ',', '.') }}
+                                    </div>
+                                @endif
+
+                                @php
+                                    $showOwner = $this->showCardField('owner');
+                                    $showTeam = $this->showCardField('team');
+                                    $showFollowUp = $this->showCardField('follow_up') && $lead->follow_up_date;
+                                @endphp
+
+                                @if ($showOwner || $showTeam || $showFollowUp)
+                                    <div class="lead-board-card-footer">
+                                        @if ($showOwner || $showTeam)
+                                            <div class="lead-board-card-people">
+                                                @if ($showOwner)
+                                                    <div class="lead-board-person">
+                                                        <span class="lead-board-person-label">
+                                                            {{ __('resources/lead.fields.sales_person') }}
+                                                        </span>
+
+                                                        @if ($lead->assignedSalesPerson)
+                                                            <div class="lead-board-team">
+                                                                <span
+                                                                    class="lead-board-team-avatar-wrap"
+                                                                    data-name="{{ $lead->assignedSalesPerson->name }}"
+                                                                    x-on:mouseenter="showTooltip($event, $event.currentTarget.dataset.name)"
+                                                                    x-on:mouseleave="hideTooltip()"
+                                                                >
+                                                                    <img
+                                                                        src="{{ $lead->assignedSalesPerson->avatar_url }}"
+                                                                        alt="{{ $lead->assignedSalesPerson->name }}"
+                                                                        class="lead-board-team-avatar"
+                                                                    />
+                                                                </span>
+                                                            </div>
+                                                        @else
+                                                            <span class="lead-board-person-value">-</span>
+                                                        @endif
+                                                    </div>
+                                                @endif
+
+                                                @if ($showTeam)
+                                                    <div class="lead-board-person">
+                                                        <span class="lead-board-person-label">
+                                                            {{ __('resources/lead.fields.sales_team') }}
+                                                        </span>
+
+                                                        @if ($lead->salesTeam->isNotEmpty())
+                                                            <div class="lead-board-team">
+                                                                @foreach ($lead->salesTeam->take(3) as $member)
+                                                                    <span
+                                                                        class="lead-board-team-avatar-wrap"
+                                                                        data-name="{{ $member->name }}"
+                                                                        x-on:mouseenter="showTooltip($event, $event.currentTarget.dataset.name)"
+                                                                        x-on:mouseleave="hideTooltip()"
+                                                                    >
+                                                                        <img
+                                                                            src="{{ $member->avatar_url }}"
+                                                                            alt="{{ $member->name }}"
+                                                                            class="lead-board-team-avatar"
+                                                                        />
+                                                                    </span>
+                                                                @endforeach
+
+                                                                @if ($lead->salesTeam->count() > 3)
+                                                                    <span
+                                                                        class="lead-board-team-more"
+                                                                        data-name="{{ $lead->salesTeam->skip(3)->pluck('name')->implode(', ') }}"
+                                                                        x-on:mouseenter="showTooltip($event, $event.currentTarget.dataset.name)"
+                                                                        x-on:mouseleave="hideTooltip()"
+                                                                    >
+                                                                        +{{ $lead->salesTeam->count() - 3 }}
+                                                                    </span>
+                                                                @endif
+                                                            </div>
+                                                        @else
+                                                            <span class="lead-board-person-value">{{ __('common.placeholders.none') }}</span>
+                                                        @endif
+                                                    </div>
+                                                @endif
+                                            </div>
+                                        @endif
+
+                                        @if ($showFollowUp)
+                                            <div class="lead-board-person lead-board-follow-up">
+                                                <span class="lead-board-person-label">
+                                                    {{ __('resources/lead.fields.follow_up') }}
+                                                </span>
+                                                <span class="lead-board-person-value {{ $lead->follow_up_date->isPast() ? 'is-overdue' : '' }}">
+                                                    {{ $lead->follow_up_date->format('d M Y') }}
+                                                </span>
+                                            </div>
+                                        @endif
+                                    </div>
+                                @endif
 
                                 @if ($lead->status !== LeadStatus::Converted)
                                     <select
@@ -723,7 +914,7 @@
 
                                             if (! status) { return }
 
-                                            if (status === 'lost' || status === 'unqualified') {
+                                            if (status === 'lost') {
                                                 pending = { id: {{ $lead->getKey() }}, status: status };
                                                 lostReason = '';
                                             } else {
@@ -743,6 +934,15 @@
                         @empty
                             <p class="lead-board-empty">{{ __('resources/lead.board.empty_column') }}</p>
                         @endforelse
+
+                        @if ($column['has_more'])
+                            <p class="lead-board-load-more">
+                                {{ __('resources/lead.board.load_more', [
+                                    'loaded' => $column['loaded'],
+                                    'total' => $column['count'],
+                                ]) }}
+                            </p>
+                        @endif
                     </div>
                 </section>
             @endforeach

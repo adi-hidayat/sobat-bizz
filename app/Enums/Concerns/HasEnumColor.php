@@ -14,7 +14,7 @@ trait HasEnumColor
             'New', 'Sent', 'Contacted', 'Received', 'Ready', 'Shipped' => 'info',
             'Qualified', 'Confirmed', 'Accepted', 'Active', 'Delivered', 'Completed', 'Fulfilled', 'Paid', 'Converted' => 'success',
             'UnderReview', 'Negotiation', 'PartiallyPaid', 'PartiallyDelivered', 'PartiallyFulfilled', 'PartiallyReceived' => 'warning',
-            'Overdue', 'Lost', 'Rejected', 'Unqualified', 'Inactive', 'Blacklisted' => 'danger',
+            'Overdue', 'Lost', 'Rejected', 'Inactive', 'Blacklisted' => 'danger',
             'Cancelled', 'Expired' => 'danger',
             default => 'gray',
         };

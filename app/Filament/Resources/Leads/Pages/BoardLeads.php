@@ -13,6 +13,7 @@ use App\Models\LeadRating;
 use App\Models\LeadSource;
 use App\Models\User;
 use Filament\Actions\Action;
+use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
@@ -29,9 +30,31 @@ use Livewire\Attributes\Url;
 
 class BoardLeads extends Page
 {
+    /**
+     * Informasi kartu yang tampil secara default.
+     *
+     * @var list<string>
+     */
+    private const DEFAULT_CARD_FIELDS = ['name', 'type', 'source', 'value'];
+
+    /**
+     * Jumlah kartu yang dimuat per kolom sebelum memuat lagi.
+     */
+    private const CARD_PAGE_SIZE = 25;
+
     protected static string $resource = LeadResource::class;
 
     protected string $view = 'filament.resources.leads.pages.board-leads';
+
+    /**
+     * @var list<string>
+     */
+    public array $visibleCardFields = self::DEFAULT_CARD_FIELDS;
+
+    /**
+     * @var array<string, int>
+     */
+    public array $loadedCounts = [];
 
     #[Url]
     public string $search = '';
@@ -57,6 +80,31 @@ class BoardLeads extends Page
     {
         return [
             LeadViewModeActions::make('board'),
+            Action::make('cardFields')
+                ->label(__('resources/lead.board.card_fields'))
+                ->extraAttributes(['class' => 'lead-card-fields-action-hidden'])
+                ->icon('heroicon-o-adjustments-horizontal')
+                ->color('gray')
+                ->slideOver()
+                ->modalHeading(__('resources/lead.board.card_fields'))
+                ->modalDescription(__('resources/lead.board.card_fields_description'))
+                ->form([
+                    CheckboxList::make('fields')
+                        ->label(__('resources/lead.board.card_fields'))
+                        ->options(fn (): array => $this->cardFieldOptions())
+                        ->default(fn (): array => $this->visibleCardFields)
+                        ->columns(2),
+                ])
+                ->action(function (array $data): void {
+                    $allowed = array_keys($this->cardFieldOptions());
+
+                    $this->visibleCardFields = array_values(array_intersect(
+                        (array) ($data['fields'] ?? []),
+                        $allowed,
+                    ));
+
+                    session(['leads.card_fields' => $this->visibleCardFields]);
+                }),
             Action::make('create')
                 ->label(__('resources/lead.actions.create'))
                 ->icon('heroicon-o-plus')
@@ -67,6 +115,40 @@ class BoardLeads extends Page
     public function mount(): void
     {
         session(['leads.view_mode' => 'board']);
+
+        $stored = session('leads.card_fields', self::DEFAULT_CARD_FIELDS);
+
+        $this->visibleCardFields = array_values(array_intersect(
+            (array) $stored,
+            array_keys($this->cardFieldOptions()),
+        ));
+    }
+
+    public function openCardFields(): void
+    {
+        $this->mountAction('cardFields');
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public function cardFieldOptions(): array
+    {
+        return [
+            'name' => __('resources/lead.fields.lead'),
+            'type' => __('resources/lead.fields.lead_type'),
+            'source' => __('resources/lead.fields.source'),
+            'value' => __('resources/lead.fields.estimated_value'),
+            'rating' => __('resources/lead.fields.rating'),
+            'owner' => __('resources/lead.fields.sales_person'),
+            'team' => __('resources/lead.fields.sales_team'),
+            'follow_up' => __('resources/lead.fields.follow_up'),
+        ];
+    }
+
+    public function showCardField(string $field): bool
+    {
+        return in_array($field, $this->visibleCardFields, true);
     }
 
     public function form(Schema $schema): Schema
@@ -121,7 +203,7 @@ class BoardLeads extends Page
 
     /**
      * @return array{
-     *     columns: list<array{status: LeadStatus, leads: Collection<int, Lead>, count: int, value: float}>
+     *     columns: list<array{status: LeadStatus, leads: Collection<int, Lead>, count: int, loaded: int, has_more: bool, value: float}>
      * }
      */
     public function getBoard(): array
@@ -130,33 +212,63 @@ class BoardLeads extends Page
             LeadStatus::New,
             LeadStatus::Contacted,
             LeadStatus::Qualified,
-            LeadStatus::Unqualified,
-            LeadStatus::Lost,
             LeadStatus::Converted,
+            LeadStatus::Lost,
         ];
 
-        $leads = $this->query()
-            ->with(['leadSource', 'assignedSalesPerson.staff', 'rating', 'salesTeam.staff'])
-            ->orderBy('board_position')
-            ->orderByDesc('created_at')
-            ->orderByDesc('id')
-            ->get()
-            ->groupBy(fn (Lead $lead): string => $lead->status->value);
+        $baseQuery = $this->query();
 
-        $columns = array_map(function (LeadStatus $status) use ($leads): array {
-            $items = $leads->get($status->value, collect());
+        $aggregates = (clone $baseQuery)
+            ->selectRaw('status, count(*) as total, sum(estimated_value) as total_value')
+            ->groupBy('status')
+            ->get()
+            ->keyBy('status');
+
+        $columns = array_map(function (LeadStatus $status) use ($baseQuery, $aggregates): array {
+            $aggregate = $aggregates->get($status->value);
+            $total = (int) ($aggregate->total ?? 0);
+            $limit = min($total, $this->loadedCounts[$status->value] ?? self::CARD_PAGE_SIZE);
+
+            $items = $limit > 0
+                ? (clone $baseQuery)
+                    ->with(['leadSource', 'assignedSalesPerson.staff', 'rating', 'salesTeam.staff'])
+                    ->where('status', $status->value)
+                    ->orderBy('board_position')
+                    ->orderByDesc('created_at')
+                    ->orderByDesc('id')
+                    ->limit($limit)
+                    ->get()
+                : collect();
 
             return [
                 'status' => $status,
                 'leads' => $items,
-                'count' => $items->count(),
-                'value' => (float) $items->sum(fn (Lead $lead): float => (float) $lead->estimated_value),
+                'count' => $total,
+                'loaded' => $items->count(),
+                'has_more' => $items->count() < $total,
+                'value' => (float) ($aggregate->total_value ?? 0),
             ];
         }, $statuses);
 
         return [
             'columns' => $columns,
         ];
+    }
+
+    public function loadMoreLeads(string $status): void
+    {
+        if (LeadStatus::tryFrom($status) === null) {
+            return;
+        }
+
+        $this->loadedCounts[$status] = ($this->loadedCounts[$status] ?? self::CARD_PAGE_SIZE) + self::CARD_PAGE_SIZE;
+    }
+
+    public function updated(string $property): void
+    {
+        if (in_array($property, ['search', 'assignedTo', 'leadSourceId', 'leadRatingId', 'leadType'], true)) {
+            $this->loadedCounts = [];
+        }
     }
 
     public function moveLead(int $leadId, string $status, ?string $lostReason = null, ?int $position = null): void
@@ -271,19 +383,6 @@ class BoardLeads extends Page
             'warning' => '#f59e0b',
             'danger' => '#ef4444',
             default => '#9ca3af',
-        };
-    }
-
-    public function ratingColor(?LeadRating $rating): string
-    {
-        return match ($rating?->color) {
-            'primary' => '#059669',
-            'info' => '#0ea5e9',
-            'success' => '#10b981',
-            'warning' => '#f59e0b',
-            'danger' => '#ef4444',
-            'gray' => '#9ca3af',
-            default => $rating?->color ?: '#9ca3af',
         };
     }
 

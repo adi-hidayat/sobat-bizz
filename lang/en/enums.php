@@ -59,8 +59,7 @@ return [
         'new' => 'New',
         'contacted' => 'Contacted',
         'qualified' => 'Qualified',
-        'unqualified' => 'Unqualified',
-        'converted' => 'Converted',
+        'converted' => 'Won',
         'lost' => 'Lost',
     ],
 

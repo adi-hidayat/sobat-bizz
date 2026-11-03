@@ -13,17 +13,15 @@ enum LeadStatus: string implements HasColor, HasLabel
     case New = 'new';
     case Contacted = 'contacted';
     case Qualified = 'qualified';
-    case Unqualified = 'unqualified';
     case Converted = 'converted';
     case Lost = 'lost';
 
     public function getColor(): string|array|null
     {
         return match ($this) {
-            self::New => 'info',
-            self::Contacted => 'primary',
-            self::Qualified => 'success',
-            self::Unqualified => 'warning',
+            self::New => 'gray',
+            self::Contacted => 'info',
+            self::Qualified => 'primary',
             self::Converted => 'success',
             self::Lost => 'danger',
         };

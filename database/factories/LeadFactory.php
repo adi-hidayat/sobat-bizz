@@ -33,7 +33,12 @@ class LeadFactory extends Factory
             'industry' => fake()->randomElement(['Teknologi', 'Manufaktur', 'Retail', 'Konstruksi', 'Perbankan']),
             'lead_source_id' => LeadSource::factory(),
             'status' => LeadStatus::New,
-            'lead_rating_id' => LeadRating::factory(),
+            'lead_rating_id' => LeadRating::query()->inRandomOrder()->value('id')
+                ?? LeadRating::factory()->create([
+                    'name' => 'Warm',
+                    'color' => '#f59e0b',
+                    'text_color' => '#111827',
+                ])->getKey(),
             'estimated_value' => fake()->numberBetween(5_000_000, 100_000_000),
             'expected_close_date' => fake()->dateTimeBetween('now', '+2 months'),
             'follow_up_date' => fake()->dateTimeBetween('now', '+1 month'),

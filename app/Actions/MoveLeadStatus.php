@@ -24,7 +24,7 @@ final class MoveLeadStatus
             return $lead;
         }
 
-        $requiresReason = in_array($status, [LeadStatus::Lost, LeadStatus::Unqualified], true);
+        $requiresReason = $status === LeadStatus::Lost;
 
         if ($requiresReason) {
             $lostReason = is_string($lostReason) ? trim($lostReason) : null;

@@ -7,8 +7,6 @@ use App\Models\Contact;
 use App\Models\Customer;
 use App\Models\Lead;
 use App\Models\LeadSource;
-use App\Models\Product;
-use App\Models\ProductCategory;
 use App\Models\Supplier;
 use Illuminate\Database\Seeder;
 
@@ -16,32 +14,6 @@ class MasterDataSeeder extends Seeder
 {
     public function run(): void
     {
-        $categories = collect(['Perangkat Keras', 'Perangkat Lunak', 'Jasa Profesional', 'Lisensi'])
-            ->mapWithKeys(fn (string $name): array => [
-                $name => ProductCategory::query()->firstOrCreate(['name' => $name]),
-            ]);
-
-        $products = [
-            ['sku' => 'HW-0001', 'name' => 'Server Rack 42U', 'type' => 'product', 'unit' => 'unit', 'price' => 18_500_000, 'category' => 'Perangkat Keras'],
-            ['sku' => 'HW-0002', 'name' => 'Laptop Bisnis 14"', 'type' => 'product', 'unit' => 'unit', 'price' => 14_000_000, 'category' => 'Perangkat Keras'],
-            ['sku' => 'HW-0003', 'name' => 'Network Switch 24 Port', 'type' => 'product', 'unit' => 'unit', 'price' => 6_750_000, 'category' => 'Perangkat Keras'],
-            ['sku' => 'SW-0001', 'name' => 'Aplikasi CRM Custom', 'type' => 'service', 'unit' => 'paket', 'price' => 75_000_000, 'category' => 'Perangkat Lunak'],
-            ['sku' => 'SV-0001', 'name' => 'Implementasi & Migrasi Data', 'type' => 'service', 'unit' => 'paket', 'price' => 25_000_000, 'category' => 'Jasa Profesional'],
-            ['sku' => 'SV-0002', 'name' => 'Pelatihan Pengguna', 'type' => 'service', 'unit' => 'hari', 'price' => 4_500_000, 'category' => 'Jasa Profesional'],
-            ['sku' => 'SV-0003', 'name' => 'Dukungan Teknis Tahunan', 'type' => 'service', 'unit' => 'tahun', 'price' => 18_000_000, 'category' => 'Jasa Profesional'],
-        ];
-
-        foreach ($products as $product) {
-            Product::query()->firstOrCreate(['sku' => $product['sku']], [
-                'name' => $product['name'],
-                'type' => $product['type'],
-                'unit' => $product['unit'],
-                'default_price' => $product['price'],
-                'product_category_id' => $categories[$product['category']]->getKey(),
-                'status' => 'active',
-            ]);
-        }
-
         $suppliers = [
             ['name' => 'PT Sumber Teknologi', 'email' => 'sales@sumberteknologi.test'],
             ['name' => 'CV Mitra Distribusi', 'email' => 'order@mitradistribusi.test'],

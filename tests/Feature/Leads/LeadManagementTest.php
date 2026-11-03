@@ -28,11 +28,17 @@ beforeEach(function (): void {
     $this->actingAs($admin);
 });
 
+it('tidak membuat rating baru saat membuat lead', function () {
+    Lead::factory()->count(5)->create();
+
+    expect(LeadRating::query()->count())->toBe(3);
+});
+
 it('membuat lead perorangan tanpa nama perusahaan', function () {
     $source = LeadSource::factory()->create();
     $rating = LeadRating::query()->firstOrCreate(
         ['name' => 'Hot'],
-        ['color' => 'danger'],
+        ['color' => '#ef4444', 'text_color' => '#ffffff'],
     );
 
     livewire(CreateLead::class)
@@ -76,7 +82,7 @@ it('mewajibkan nama perusahaan untuk lead bertipe perusahaan', function () {
         ->assertHasFormErrors(['company_name' => 'required']);
 });
 
-it('mewajibkan alasan ketika lead lost atau tidak berkualitas', function () {
+it('mewajibkan alasan ketika lead berstatus kalah', function () {
     $source = LeadSource::factory()->create();
 
     livewire(CreateLead::class)

@@ -39,10 +39,13 @@ class LeadInfolist
                                         TextEntry::make('status')->label(__('common.fields.status'))->badge(),
                                         TextEntry::make('rating.name')
                                             ->label(__('resources/lead.fields.rating'))
-                                            ->badge()
-                                            ->color(fn (Lead $record): string => $record->rating?->color ?? 'gray')
+                                            ->formatStateUsing(fn (?string $state, Lead $record): string => view(
+                                                'filament.partials.lead-rating-badge',
+                                                ['rating' => $record->rating],
+                                            )->render())
+                                            ->html()
                                             ->placeholder(__('common.placeholders.none')),
-                                        TextEntry::make('estimated_value')->label(__('resources/lead.fields.estimated_value'))->money('IDR'),
+                                        TextEntry::make('estimated_value')->label(__('resources/lead.fields.estimated_value'))->money('IDR')->prefix('~'),
                                         TextEntry::make('expected_close_date')
                                             ->label(__('common.fields.expected_close_date'))
                                             ->date('d M Y')

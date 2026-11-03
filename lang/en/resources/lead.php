@@ -33,7 +33,7 @@ return [
         'primary_contact' => 'Primary contact',
         'rating' => 'Rating',
         'estimated_value' => 'Estimated value',
-        'lost_reason' => 'Lost / unqualified reason',
+        'lost_reason' => 'Lost reason',
         'last_contacted_at' => 'Last contacted',
         'activity_type' => 'Activity type',
         'activity_subject' => 'Subject',
@@ -65,7 +65,7 @@ return [
         'table' => 'Table',
         'create' => 'Add Lead',
         'convert' => 'Convert to Customer',
-        'convert_description' => 'The lead will be marked as Converted and a new customer will be created from this lead data.',
+        'convert_description' => 'The lead will be marked as Won and a new customer will be created from this lead data.',
     ],
 
     'board' => [
@@ -77,14 +77,17 @@ return [
         'all_ratings' => 'All ratings',
         'all_types' => 'All types',
         'you_option' => ':name (You)',
+        'card_fields' => 'Card information',
+        'card_fields_description' => 'Choose which information should be displayed on each lead card.',
+        'load_more' => 'Showing :loaded of :total — scroll to load more',
         'empty_column' => 'No leads yet.',
         'move' => 'Move to',
-        'lost_reason_title' => 'Lost / unqualified reason',
+        'lost_reason_title' => 'Lost reason',
         'lost_reason_help' => 'Provide a reason before moving the lead to this status.',
         'lost_reason_placeholder' => 'Example: no budget yet, chose a competitor, etc.',
         'errors' => [
             'conversion_blocked' => 'Conversion can only be done through the Convert to Customer action.',
-            'lost_reason_required' => 'A reason is required for the Lost or Unqualified status.',
+            'lost_reason_required' => 'A reason is required for the Lost status.',
         ],
         'notifications' => [
             'moved' => ':lead moved to :status.',

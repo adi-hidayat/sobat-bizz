@@ -7,9 +7,11 @@ use App\Filament\Resources\ProductCategories\Pages\ListProductCategories;
 use App\Filament\Resources\Taxes\Pages\ListTaxes;
 use App\Models\Lead;
 use App\Models\LeadSource;
+use App\Models\Product;
 use App\Models\ProductCategory;
 use App\Models\Tax;
 use App\Models\User;
+use Database\Seeders\ProductSeeder;
 use Database\Seeders\RoleAndPermissionSeeder;
 
 use function Pest\Livewire\livewire;
@@ -59,6 +61,13 @@ it('membuka form ubah sumber lead dalam slide over', function () {
     livewire(ListLeadSources::class)
         ->mountTableAction('edit', $source)
         ->assertMountedActionModalSee(['Nama sumber']);
+});
+
+it('mengisi lima puluh produk pada master data', function () {
+    $this->seed(ProductSeeder::class);
+
+    expect(Product::query()->count())->toBe(50)
+        ->and(Product::query()->distinct()->count('sku'))->toBe(50);
 });
 
 it('membuat kategori produk dari halaman setup', function () {

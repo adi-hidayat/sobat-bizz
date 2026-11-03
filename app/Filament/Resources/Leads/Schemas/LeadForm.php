@@ -173,6 +173,6 @@ class LeadForm
             $value = $value->value;
         }
 
-        return in_array($value, [LeadStatus::Lost->value, LeadStatus::Unqualified->value], true);
+        return $value === LeadStatus::Lost->value;
     }
 }

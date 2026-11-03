@@ -11,16 +11,8 @@ return [
 
     'fields' => [
         'color' => 'Warna',
+        'text_color' => 'Warna teks',
         'leads_count' => 'Jumlah lead',
-    ],
-
-    'colors' => [
-        'gray' => 'Abu-abu',
-        'primary' => 'Utama',
-        'info' => 'Info',
-        'success' => 'Sukses',
-        'warning' => 'Peringatan',
-        'danger' => 'Bahaya',
     ],
 
 ];

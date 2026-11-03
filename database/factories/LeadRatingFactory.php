@@ -17,9 +17,21 @@ class LeadRatingFactory extends Factory
      */
     public function definition(): array
     {
+        $colors = [
+            ['#6b7280', '#ffffff'],
+            ['#059669', '#ffffff'],
+            ['#0ea5e9', '#ffffff'],
+            ['#10b981', '#ffffff'],
+            ['#f59e0b', '#111827'],
+            ['#ef4444', '#ffffff'],
+        ];
+
+        [$color, $textColor] = fake()->randomElement($colors);
+
         return [
             'name' => ucfirst(fake()->unique()->words(2, true)),
-            'color' => fake()->randomElement(LeadRating::COLORS),
+            'color' => $color,
+            'text_color' => $textColor,
             'description' => fake()->optional()->sentence(),
         ];
     }

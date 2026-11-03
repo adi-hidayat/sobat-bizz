@@ -13,12 +13,16 @@ final class LeadViewModeActions
         return ActionGroup::make([
             Action::make('tableMode')
                 ->label(__('resources/lead.actions.table'))
-                ->icon('heroicon-o-table-cells')
+                ->hiddenLabel()
+                ->tooltip(__('resources/lead.actions.table'))
+                ->icon('heroicon-o-list-bullet')
                 ->color($currentMode === 'table' ? 'primary' : 'gray')
                 ->url(LeadResource::getUrl('index', ['view' => 'table'])),
             Action::make('pipelineMode')
                 ->label(__('resources/lead.actions.pipeline'))
-                ->icon('heroicon-o-view-columns')
+                ->hiddenLabel()
+                ->tooltip(__('resources/lead.actions.pipeline'))
+                ->icon('heroicon-o-squares-2x2')
                 ->color($currentMode === 'board' ? 'primary' : 'gray')
                 ->url(LeadResource::getUrl('board')),
         ])->buttonGroup();

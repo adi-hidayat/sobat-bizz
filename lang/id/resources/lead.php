@@ -33,7 +33,7 @@ return [
         'primary_contact' => 'Kontak utama',
         'rating' => 'Rating',
         'estimated_value' => 'Nilai peluang',
-        'lost_reason' => 'Alasan lost / tidak berkualitas',
+        'lost_reason' => 'Alasan kalah',
         'last_contacted_at' => 'Terakhir dihubungi',
         'activity_type' => 'Tipe aktivitas',
         'activity_subject' => 'Subjek',
@@ -65,7 +65,7 @@ return [
         'table' => 'Tabel',
         'create' => 'Tambah Lead',
         'convert' => 'Konversi ke Customer',
-        'convert_description' => 'Lead akan ditandai Converted dan customer baru dibuat dari data lead ini.',
+        'convert_description' => 'Lead akan ditandai Menang dan customer baru dibuat dari data lead ini.',
     ],
 
     'board' => [
@@ -77,14 +77,17 @@ return [
         'all_ratings' => 'Semua rating',
         'all_types' => 'Semua tipe',
         'you_option' => ':name (Anda)',
+        'card_fields' => 'Informasi kartu',
+        'card_fields_description' => 'Pilih informasi yang ingin ditampilkan pada kartu lead.',
+        'load_more' => 'Menampilkan :loaded dari :total — gulir untuk memuat lagi',
         'empty_column' => 'Belum ada lead.',
         'move' => 'Pindahkan',
-        'lost_reason_title' => 'Alasan lost / tidak berkualitas',
+        'lost_reason_title' => 'Alasan kalah',
         'lost_reason_help' => 'Isi alasan sebelum memindahkan lead ke status ini.',
         'lost_reason_placeholder' => 'Contoh: budget belum tersedia, memilih kompetitor, dsb.',
         'errors' => [
             'conversion_blocked' => 'Konversi hanya bisa melalui aksi Konversi ke Customer.',
-            'lost_reason_required' => 'Alasan wajib diisi untuk status Hilang atau Tidak Berkualitas.',
+            'lost_reason_required' => 'Alasan wajib diisi untuk status Kalah.',
         ],
         'notifications' => [
             'moved' => ':lead dipindahkan ke :status.',
