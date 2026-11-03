@@ -72,12 +72,10 @@ it('mengarahkan root ke panel admin', function () {
     $this->get('/')->assertRedirect('/admin');
 });
 
-it('mengingat mode lead terakhir yang dibuka', function () {
+it('menampilkan daftar lead tanpa parameter view', function () {
     $this->get('/admin/leads/board')->assertOk();
 
-    $this->get('/admin/leads')->assertRedirect('/admin/leads/board');
-
-    $this->get('/admin/leads?view=table')->assertOk();
+    $this->get('/admin/leads')->assertOk();
 
     $this->get('/admin/leads')->assertOk();
 });

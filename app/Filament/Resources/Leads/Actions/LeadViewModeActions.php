@@ -17,7 +17,7 @@ final class LeadViewModeActions
                 ->tooltip(__('resources/lead.actions.table'))
                 ->icon('heroicon-o-list-bullet')
                 ->color($currentMode === 'table' ? 'primary' : 'gray')
-                ->url(LeadResource::getUrl('index', ['view' => 'table'])),
+                ->url(LeadResource::getUrl('index')),
             Action::make('pipelineMode')
                 ->label(__('resources/lead.actions.pipeline'))
                 ->hiddenLabel()

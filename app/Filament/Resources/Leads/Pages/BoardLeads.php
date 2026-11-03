@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Leads\Pages;
 
+use App\Actions\ConvertLeadToCustomer;
 use App\Actions\MoveLeadStatus;
 use App\Enums\LeadStatus;
 use App\Enums\LeadType;
@@ -35,7 +36,7 @@ class BoardLeads extends Page
      *
      * @var list<string>
      */
-    private const DEFAULT_CARD_FIELDS = ['name', 'type', 'source', 'value'];
+    private const DEFAULT_CARD_FIELDS = ['name', 'type', 'source', 'value', 'rating', 'team'];
 
     /**
      * Jumlah kartu yang dimuat per kolom sebelum memuat lagi.
@@ -117,6 +118,12 @@ class BoardLeads extends Page
         session(['leads.view_mode' => 'board']);
 
         $stored = session('leads.card_fields', self::DEFAULT_CARD_FIELDS);
+
+        if ($stored === ['name', 'type', 'source', 'value']) {
+            $stored = self::DEFAULT_CARD_FIELDS;
+
+            session(['leads.card_fields' => $stored]);
+        }
 
         $this->visibleCardFields = array_values(array_intersect(
             (array) $stored,
@@ -300,6 +307,24 @@ class BoardLeads extends Page
         }
 
         try {
+            if ($target === LeadStatus::Converted) {
+                $customer = DB::transaction(function () use ($lead, $target, $position) {
+                    $converted = app(ConvertLeadToCustomer::class)->handle($lead);
+
+                    $this->placeLead($lead, $target, $position);
+
+                    return $converted;
+                });
+
+                Notification::make()
+                    ->success()
+                    ->title(__('resources/lead.notifications.converted_title'))
+                    ->body(__('resources/lead.notifications.converted_body', ['customer_code' => $customer->customer_code]))
+                    ->send();
+
+                return;
+            }
+
             DB::transaction(function () use ($lead, $target, $lostReason, $position): void {
                 app(MoveLeadStatus::class)->handle($lead, $target, $lostReason);
 
@@ -368,10 +393,7 @@ class BoardLeads extends Page
      */
     public function getMovableStatuses(): array
     {
-        return array_values(array_filter(
-            LeadStatus::cases(),
-            fn (LeadStatus $status): bool => $status !== LeadStatus::Converted,
-        ));
+        return LeadStatus::cases();
     }
 
     public function statusColor(LeadStatus $status): string

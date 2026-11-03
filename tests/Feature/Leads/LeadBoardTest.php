@@ -2,6 +2,7 @@
 
 use App\Enums\LeadStatus;
 use App\Filament\Resources\Leads\Pages\BoardLeads;
+use App\Models\Customer;
 use App\Models\Lead;
 use App\Models\User;
 use Database\Seeders\RoleAndPermissionSeeder;
@@ -59,13 +60,29 @@ it('menyimpan alasan ketika memindahkan lead ke kalah', function () {
         ->and($lead->lost_reason)->toBe('Budget belum tersedia');
 });
 
-it('menolak memindahkan lead ke status menang', function () {
+it('otomatis membuat customer ketika lead digeser ke menang', function () {
     $lead = Lead::factory()->qualified()->create();
+
+    livewire(BoardLeads::class)
+        ->call('moveLead', $lead->getKey(), LeadStatus::Converted->value)
+        ->assertNotified(__('resources/lead.notifications.converted_title'));
+
+    expect($lead->refresh()->status)->toBe(LeadStatus::Converted)
+        ->and($lead->converted_at)->not->toBeNull()
+        ->and(Customer::query()->where('lead_id', $lead->getKey())->exists())->toBeTrue();
+});
+
+it('menolak menggeser lead yang tidak konvertibel ke menang', function () {
+    $lead = Lead::factory()->create([
+        'status' => LeadStatus::Lost,
+        'lost_reason' => 'Budget belum ada',
+    ]);
 
     livewire(BoardLeads::class)
         ->call('moveLead', $lead->getKey(), LeadStatus::Converted->value);
 
-    expect($lead->refresh()->status)->toBe(LeadStatus::Qualified);
+    expect($lead->refresh()->status)->toBe(LeadStatus::Lost)
+        ->and(Customer::query()->where('lead_id', $lead->getKey())->exists())->toBeFalse();
 });
 
 it('menolak memindahkan lead yang sudah menang', function () {
@@ -173,11 +190,11 @@ it('menampilkan informasi kartu default dan dapat diubah lewat aksi', function (
     $lead = Lead::factory()->create(['estimated_value' => 7_500_000]);
 
     $component = livewire(BoardLeads::class)
-        ->assertSet('visibleCardFields', ['name', 'type', 'source', 'value'])
+        ->assertSet('visibleCardFields', ['name', 'type', 'source', 'value', 'rating', 'team'])
         ->assertSee($lead->display_name)
         ->assertSee('7.500.000')
         ->assertDontSee('Sales penanggung jawab')
-        ->assertDontSee('Tim sales');
+        ->assertSee('Tim sales');
 
     $component
         ->callAction('cardFields', ['fields' => ['name', 'owner']])
