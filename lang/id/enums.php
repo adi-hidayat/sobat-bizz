@@ -74,12 +74,12 @@ return [
         'cold' => 'Dingin',
     ],
 
-    'lead_activity_type' => [
-        'call' => 'Telepon',
-        'email' => 'Email',
+    'lead_activity_group' => [
+        'communication' => 'Komunikasi',
         'meeting' => 'Meeting',
-        'note' => 'Catatan',
+        'sales' => 'Sales',
         'task' => 'Tugas',
+        'internal' => 'Internal',
     ],
 
     'payment_method' => [

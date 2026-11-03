@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             ProductSeeder::class,
             MasterDataSeeder::class,
             LeadRatingSeeder::class,
+            LeadActivityTypeSeeder::class,
             LeadSeeder::class,
             DemoPipelineSeeder::class,
         ]);

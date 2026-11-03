@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Enums\LeadActivityType;
 use Database\Factories\LeadActivityFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -17,7 +16,7 @@ class LeadActivity extends Model
     protected $fillable = [
         'lead_id',
         'user_id',
-        'type',
+        'lead_activity_type_id',
         'subject',
         'notes',
         'occurred_at',
@@ -33,7 +32,6 @@ class LeadActivity extends Model
     protected function casts(): array
     {
         return [
-            'type' => LeadActivityType::class,
             'occurred_at' => 'datetime',
             'due_at' => 'datetime',
             'completed_at' => 'datetime',
@@ -47,7 +45,7 @@ class LeadActivity extends Model
         });
 
         static::created(function (LeadActivity $activity): void {
-            if (! $activity->type->updatesLastContactedAt()) {
+            if (! $activity->activityType?->updatesLastContactedAt()) {
                 return;
             }
 
@@ -66,6 +64,11 @@ class LeadActivity extends Model
     public function lead(): BelongsTo
     {
         return $this->belongsTo(Lead::class);
+    }
+
+    public function activityType(): BelongsTo
+    {
+        return $this->belongsTo(LeadActivityType::class, 'lead_activity_type_id');
     }
 
     public function user(): BelongsTo

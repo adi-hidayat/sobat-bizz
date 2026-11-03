@@ -2,9 +2,9 @@
 
 namespace Database\Factories;
 
-use App\Enums\LeadActivityType;
 use App\Models\Lead;
 use App\Models\LeadActivity;
+use App\Models\LeadActivityType;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -23,7 +23,15 @@ class LeadActivityFactory extends Factory
         return [
             'lead_id' => Lead::factory(),
             'user_id' => User::factory(),
-            'type' => LeadActivityType::Call,
+            'lead_activity_type_id' => LeadActivityType::query()->firstOrCreate(
+                ['key' => 'call'],
+                [
+                    'name' => 'Panggilan Telepon',
+                    'group' => 'communication',
+                    'is_active' => true,
+                    'sort_order' => 1,
+                ],
+            )->getKey(),
             'subject' => fake()->sentence(3),
             'notes' => fake()->optional()->paragraph(),
             'occurred_at' => now(),
@@ -35,7 +43,15 @@ class LeadActivityFactory extends Factory
     public function task(): static
     {
         return $this->state(fn (): array => [
-            'type' => LeadActivityType::Task,
+            'lead_activity_type_id' => LeadActivityType::query()->firstOrCreate(
+                ['key' => 'task'],
+                [
+                    'name' => 'Tugas',
+                    'group' => 'task',
+                    'is_active' => true,
+                    'sort_order' => 5,
+                ],
+            )->getKey(),
             'due_at' => now()->addDay(),
         ]);
     }

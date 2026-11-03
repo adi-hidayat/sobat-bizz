@@ -2,9 +2,10 @@
 
 namespace App\Filament\Resources\Leads\RelationManagers;
 
-use App\Enums\LeadActivityType;
+use App\Enums\LeadActivityGroup;
 use App\Filament\Actions\TableActions;
 use App\Models\LeadActivity;
+use App\Models\LeadActivityType;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
@@ -37,11 +38,16 @@ class ActivitiesRelationManager extends RelationManager
     {
         return $schema
             ->components([
-                Select::make('type')
+                Select::make('lead_activity_type_id')
                     ->label(__('resources/lead.fields.activity_type'))
-                    ->options(LeadActivityType::class)
-                    ->default(LeadActivityType::Call)
+                    ->options(fn (): array => LeadActivityType::groupedOptions())
+                    ->default(function (): ?int {
+                        $types = LeadActivityType::query()->active()->ordered()->get();
+
+                        return ($types->firstWhere('key', 'call') ?? $types->first())?->getKey();
+                    })
                     ->required()
+                    ->searchable()
                     ->live(),
                 TextInput::make('subject')
                     ->label(__('resources/lead.fields.activity_subject'))
@@ -66,9 +72,14 @@ class ActivitiesRelationManager extends RelationManager
         return $table
             ->recordTitleAttribute('subject')
             ->columns([
-                TextColumn::make('type')
+                TextColumn::make('activityType.name')
                     ->label(__('resources/lead.fields.activity_type'))
-                    ->badge(),
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('activityType.group')
+                    ->label(__('resources/lead.fields.activity_group'))
+                    ->badge()
+                    ->formatStateUsing(fn (?LeadActivityGroup $state): string => $state?->getLabel() ?? '-'),
                 TextColumn::make('subject')
                     ->label(__('resources/lead.fields.activity_subject'))
                     ->searchable()
@@ -116,8 +127,12 @@ class ActivitiesRelationManager extends RelationManager
 
     private function isTask(Get $get): bool
     {
-        $value = $get('type');
+        $typeId = $get('lead_activity_type_id');
 
-        return $value === LeadActivityType::Task || $value === LeadActivityType::Task->value;
+        if (blank($typeId)) {
+            return false;
+        }
+
+        return LeadActivityType::query()->whereKey($typeId)->value('group') === LeadActivityGroup::Task->value;
     }
 }

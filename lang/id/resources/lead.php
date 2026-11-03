@@ -36,6 +36,7 @@ return [
         'lost_reason' => 'Alasan kalah',
         'last_contacted_at' => 'Terakhir dihubungi',
         'activity_type' => 'Tipe aktivitas',
+        'activity_group' => 'Grup aktivitas',
         'activity_subject' => 'Subjek',
         'activity_occurred_at' => 'Waktu',
         'activity_due_at' => 'Jatuh tempo',

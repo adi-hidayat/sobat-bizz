@@ -74,12 +74,12 @@ return [
         'cold' => 'Cold',
     ],
 
-    'lead_activity_type' => [
-        'call' => 'Call',
-        'email' => 'Email',
+    'lead_activity_group' => [
+        'communication' => 'Communication',
         'meeting' => 'Meeting',
-        'note' => 'Note',
+        'sales' => 'Sales',
         'task' => 'Task',
+        'internal' => 'Internal',
     ],
 
     'payment_method' => [

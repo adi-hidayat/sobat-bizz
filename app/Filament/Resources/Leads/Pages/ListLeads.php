@@ -22,7 +22,9 @@ class ListLeads extends ListRecords
     {
         return [
             LeadViewModeActions::make('table'),
-            CreateAction::make(),
+            CreateAction::make()
+                ->label(__('resources/lead.actions.create'))
+                ->icon('heroicon-o-plus'),
         ];
     }
 }

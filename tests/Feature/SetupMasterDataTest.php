@@ -1,11 +1,14 @@
 <?php
 
+use App\Enums\LeadActivityGroup;
 use App\Enums\TaxType;
+use App\Filament\Resources\LeadActivityTypes\Pages\ListLeadActivityTypes;
 use App\Filament\Resources\Leads\Pages\CreateLead;
 use App\Filament\Resources\LeadSources\Pages\ListLeadSources;
 use App\Filament\Resources\ProductCategories\Pages\ListProductCategories;
 use App\Filament\Resources\Taxes\Pages\ListTaxes;
 use App\Models\Lead;
+use App\Models\LeadActivityType;
 use App\Models\LeadSource;
 use App\Models\Product;
 use App\Models\ProductCategory;
@@ -118,6 +121,30 @@ it('menghitung pajak fixed tanpa persentase', function () {
     $tax = Tax::factory()->fixed()->create(['value' => 25_000]);
 
     expect($tax->amountFor(1_000_000.0))->toBe(25_000.0);
+});
+
+it('merender halaman master tipe aktivitas lead', function () {
+    livewire(ListLeadActivityTypes::class)
+        ->assertOk()
+        ->assertCanSeeTableRecords(LeadActivityType::query()->get());
+});
+
+it('membuat tipe aktivitas lead baru dari modal', function () {
+    livewire(ListLeadActivityTypes::class)
+        ->callAction('create', [
+            'key' => 'visit',
+            'name' => 'Kunjungan',
+            'group' => LeadActivityGroup::Meeting->value,
+            'sort_order' => 7,
+            'is_active' => true,
+        ])
+        ->assertHasNoActionErrors();
+
+    $type = LeadActivityType::query()->where('key', 'visit')->first();
+
+    expect($type)->not->toBeNull()
+        ->and($type->name)->toBe('Kunjungan')
+        ->and($type->group)->toBe(LeadActivityGroup::Meeting);
 });
 
 it('memakai sumber lead dari master data pada form lead', function () {

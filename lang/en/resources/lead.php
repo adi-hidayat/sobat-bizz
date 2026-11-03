@@ -36,6 +36,7 @@ return [
         'lost_reason' => 'Lost reason',
         'last_contacted_at' => 'Last contacted',
         'activity_type' => 'Activity type',
+        'activity_group' => 'Activity group',
         'activity_subject' => 'Subject',
         'activity_occurred_at' => 'Date',
         'activity_due_at' => 'Due date',

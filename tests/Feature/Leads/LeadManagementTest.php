@@ -2,7 +2,6 @@
 
 use App\Actions\ConvertLeadToCustomer;
 use App\Enums\CustomerType;
-use App\Enums\LeadActivityType;
 use App\Enums\LeadStatus;
 use App\Enums\LeadType;
 use App\Filament\Resources\Leads\Pages\CreateLead;
@@ -12,6 +11,7 @@ use App\Filament\Resources\Leads\Pages\ViewLead;
 use App\Filament\Resources\Leads\RelationManagers\ActivitiesRelationManager;
 use App\Models\Lead;
 use App\Models\LeadActivity;
+use App\Models\LeadActivityType;
 use App\Models\LeadRating;
 use App\Models\LeadSource;
 use App\Models\User;
@@ -114,10 +114,12 @@ it('menampilkan lead perorangan dengan nama orang pada tabel', function () {
 it('memperbarui waktu terakhir dihubungi dari aktivitas kontak', function () {
     $lead = Lead::factory()->create();
     $occurredAt = now()->subHour();
+    $callType = LeadActivityType::query()->where('key', 'call')->firstOrFail();
+    $taskType = LeadActivityType::query()->where('key', 'task')->firstOrFail();
 
     LeadActivity::query()->create([
         'lead_id' => $lead->getKey(),
-        'type' => LeadActivityType::Call,
+        'lead_activity_type_id' => $callType->getKey(),
         'subject' => 'Follow up telepon',
         'occurred_at' => $occurredAt,
     ]);
@@ -126,13 +128,41 @@ it('memperbarui waktu terakhir dihubungi dari aktivitas kontak', function () {
 
     LeadActivity::query()->create([
         'lead_id' => $lead->getKey(),
-        'type' => LeadActivityType::Task,
+        'lead_activity_type_id' => $taskType->getKey(),
         'subject' => 'Kirim penawaran',
         'occurred_at' => now(),
         'due_at' => now()->addDay(),
     ]);
 
     expect($lead->refresh()->last_contacted_at?->toDateTimeString())->toBe($occurredAt->toDateTimeString());
+});
+
+it('menyediakan master aktivitas yang dikelompokkan berdasarkan grup', function () {
+    $options = LeadActivityType::groupedOptions();
+
+    expect($options)->toHaveKeys(['Komunikasi', 'Meeting', 'Sales', 'Tugas', 'Internal'])
+        ->and($options['Komunikasi'])->toContain('Panggilan Telepon', 'Email')
+        ->and($options['Sales'])->toContain('Penawaran');
+});
+
+it('menyimpan aktivitas lead beserta waktu dan deskripsinya', function () {
+    $lead = Lead::factory()->create();
+    $callType = LeadActivityType::query()->where('key', 'call')->firstOrFail();
+    $occurredAt = now()->subHours(2);
+
+    $activity = LeadActivity::query()->create([
+        'lead_id' => $lead->getKey(),
+        'lead_activity_type_id' => $callType->getKey(),
+        'subject' => 'Telepon perdana',
+        'notes' => 'Prospek tertarik, minta penawaran.',
+        'occurred_at' => $occurredAt,
+    ]);
+
+    expect($activity->activityType->getKey())->toBe($callType->getKey())
+        ->and($activity->activityType->group->getLabel())->toBe('Komunikasi')
+        ->and($activity->notes)->toBe('Prospek tertarik, minta penawaran.')
+        ->and($activity->occurred_at->toDateTimeString())->toBe($occurredAt->toDateTimeString())
+        ->and($lead->refresh()->last_contacted_at?->toDateTimeString())->toBe($occurredAt->toDateTimeString());
 });
 
 it('menampilkan aktivitas pada halaman lead', function () {
@@ -147,7 +177,9 @@ it('menampilkan aktivitas pada halaman lead', function () {
         'pageClass' => ViewLead::class,
     ])
         ->assertOk()
-        ->assertCanSeeTableRecords([$activity]);
+        ->assertCanSeeTableRecords([$activity])
+        ->assertSee('Panggilan Telepon')
+        ->assertSee('Komunikasi');
 });
 
 it('menyimpan owner dan tim sales tambahan pada lead', function () {
