@@ -52,7 +52,7 @@ it('membuka form ubah kota dalam slide over', function () {
 
     livewire(ListCities::class)
         ->mountTableAction('edit', $city)
-        ->assertMountedActionModalSee(['Nama kota / kabupaten']);
+        ->assertMountedActionModalSee(['Nama kota dan kabupaten']);
 });
 
 it('membuat negara baru pada level country dari modal', function () {

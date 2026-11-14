@@ -2,8 +2,8 @@
 
 return [
 
-    'model_label' => 'Kota / Kabupaten',
+    'model_label' => 'Kota dan Kabupaten',
 
-    'plural_model_label' => 'Kota / Kabupaten',
+    'plural_model_label' => 'Kota dan Kabupaten',
 
 ];

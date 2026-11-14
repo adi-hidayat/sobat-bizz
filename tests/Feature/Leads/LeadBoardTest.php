@@ -175,6 +175,14 @@ it('mengirim notifikasi urutan ketika hanya mengubah posisi', function () {
         ]));
 });
 
+it('kembali ke daftar lead lewat tombol mode tabel', function () {
+    livewire(BoardLeads::class)
+        ->callAction('tableMode')
+        ->assertRedirect('/admin/leads');
+
+    expect(session('leads.view_mode'))->toBe('table');
+});
+
 it('menampilkan avatar tim sales pada kartu board', function () {
     $member = User::factory()->create(['name' => 'Sales Pendukung', 'is_active' => true]);
     $lead = Lead::factory()->create();

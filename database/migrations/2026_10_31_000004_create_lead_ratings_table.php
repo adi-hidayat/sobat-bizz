@@ -7,6 +7,10 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * File ini memakai timestamp 000004 agar selalu jalan sebelum create_leads_table,
+     * karena kolom leads.lead_rating_id memakai FK inline ke tabel di bawah ini.
+     */
     public function up(): void
     {
         Schema::create('lead_ratings', function (Blueprint $table) {
@@ -18,22 +22,11 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        Schema::table('leads', function (Blueprint $table) {
-            $table->foreign('lead_rating_id')
-                ->references('id')
-                ->on('lead_ratings')
-                ->nullOnDelete();
-        });
-
         $this->createDefaultRatings();
     }
 
     public function down(): void
     {
-        Schema::table('leads', function (Blueprint $table) {
-            $table->dropForeign(['lead_rating_id']);
-        });
-
         Schema::dropIfExists('lead_ratings');
     }
 

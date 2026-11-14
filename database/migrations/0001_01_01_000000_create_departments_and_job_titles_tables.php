@@ -6,6 +6,11 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * File ini memakai prefix 0001 agar selalu jalan sebelum create_users_table,
+     * karena kolom users.job_title_id dan staff.department_id memakai FK inline
+     * ke tabel di bawah ini.
+     */
     public function up(): void
     {
         Schema::create('departments', function (Blueprint $table) {
@@ -27,32 +32,10 @@ return new class extends Migration
 
             $table->index(['is_active', 'sort_order']);
         });
-
-        Schema::table('staff', function (Blueprint $table) {
-            $table->foreign('department_id')
-                ->references('id')
-                ->on('departments')
-                ->nullOnDelete();
-        });
-
-        Schema::table('users', function (Blueprint $table) {
-            $table->foreign('job_title_id')
-                ->references('id')
-                ->on('job_titles')
-                ->nullOnDelete();
-        });
     }
 
     public function down(): void
     {
-        Schema::table('staff', function (Blueprint $table) {
-            $table->dropForeign(['department_id']);
-        });
-
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropForeign(['job_title_id']);
-        });
-
         Schema::dropIfExists('job_titles');
         Schema::dropIfExists('departments');
     }

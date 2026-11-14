@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('lead_id')->constrained()->cascadeOnDelete();
             $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete();
-            $table->string('type', 20);
+            $table->foreignId('lead_activity_type_id')->nullable()->constrained('lead_activity_types')->nullOnDelete();
             $table->string('subject')->nullable();
             $table->text('notes')->nullable();
             $table->timestamp('occurred_at');
@@ -24,7 +24,6 @@ return new class extends Migration
             $table->timestamps();
 
             $table->index(['lead_id', 'occurred_at']);
-            $table->index('type');
         });
     }
 

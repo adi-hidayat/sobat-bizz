@@ -21,7 +21,7 @@ return [
         'postal_code' => 'Kode pos',
         'country' => 'Negara',
         'state' => 'Provinsi',
-        'city' => 'Kota / Kabupaten',
+        'city' => 'Kota dan Kabupaten',
         'district' => 'Kecamatan',
         'village' => 'Desa / Kelurahan',
         'latitude' => 'Latitude',
@@ -165,7 +165,7 @@ return [
     'region_levels' => [
         'country' => 'Negara',
         'state' => 'Provinsi',
-        'city' => 'Kota / Kabupaten',
+        'city' => 'Kota dan Kabupaten',
         'district' => 'Kecamatan',
         'village' => 'Desa / Kelurahan',
     ],

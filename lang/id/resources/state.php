@@ -2,8 +2,8 @@
 
 return [
 
-    'model_label' => 'Provinsi / Negara Bagian',
+    'model_label' => 'Provinsi dan Negara Bagian',
 
-    'plural_model_label' => 'Provinsi / Negara Bagian',
+    'plural_model_label' => 'Provinsi dan Negara Bagian',
 
 ];

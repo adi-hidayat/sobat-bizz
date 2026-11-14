@@ -7,6 +7,11 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * File ini memakai timestamp 150609 agar selalu jalan sebelum
+     * create_lead_activities_table, karena kolom
+     * lead_activities.lead_activity_type_id memakai FK inline ke tabel di bawah ini.
+     */
     public function up(): void
     {
         Schema::create('lead_activity_types', function (Blueprint $table) {
@@ -20,39 +25,10 @@ return new class extends Migration
         });
 
         $this->seedDefaultTypes();
-
-        Schema::table('lead_activities', function (Blueprint $table) {
-            $table->foreignId('lead_activity_type_id')
-                ->nullable()
-                ->constrained('lead_activity_types')
-                ->nullOnDelete();
-        });
-
-        $this->backfillActivityTypes();
-
-        Schema::table('lead_activities', function (Blueprint $table) {
-            $table->dropIndex(['type']);
-            $table->dropColumn('type');
-        });
     }
 
     public function down(): void
     {
-        Schema::table('lead_activities', function (Blueprint $table) {
-            $table->string('type', 20)->nullable();
-        });
-
-        foreach (DB::table('lead_activity_types')->pluck('key', 'id') as $id => $key) {
-            DB::table('lead_activities')
-                ->where('lead_activity_type_id', $id)
-                ->update(['type' => $key]);
-        }
-
-        Schema::table('lead_activities', function (Blueprint $table) {
-            $table->dropForeign(['lead_activity_type_id']);
-            $table->dropColumn('lead_activity_type_id');
-        });
-
         Schema::dropIfExists('lead_activity_types');
     }
 
@@ -78,20 +54,5 @@ return new class extends Migration
             ],
             $types,
         ));
-    }
-
-    private function backfillActivityTypes(): void
-    {
-        $ids = DB::table('lead_activity_types')->pluck('id', 'key');
-
-        foreach (['call', 'email', 'meeting', 'task', 'note'] as $key) {
-            if (! isset($ids[$key])) {
-                continue;
-            }
-
-            DB::table('lead_activities')
-                ->where('type', $key)
-                ->update(['lead_activity_type_id' => $ids[$key]]);
-        }
     }
 };

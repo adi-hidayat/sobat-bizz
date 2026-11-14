@@ -21,7 +21,7 @@ return new class extends Migration
             $table->string('industry')->nullable();
             $table->foreignId('lead_source_id')->nullable()->constrained('lead_sources')->nullOnDelete();
             $table->string('status', 30)->default('new');
-            $table->foreignId('lead_rating_id')->nullable()->index();
+            $table->foreignId('lead_rating_id')->nullable()->constrained('lead_ratings')->nullOnDelete();
             $table->decimal('estimated_value', 18, 2)->default(0);
             $table->date('expected_close_date')->nullable();
             $table->foreignId('assigned_to')->nullable()->constrained('users')->nullOnDelete();

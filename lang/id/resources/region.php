@@ -7,7 +7,7 @@ return [
         'name' => [
             'country' => 'Nama negara',
             'state' => 'Nama provinsi',
-            'city' => 'Nama kota / kabupaten',
+            'city' => 'Nama kota dan kabupaten',
             'district' => 'Nama kecamatan',
             'village' => 'Nama desa / kelurahan',
         ],

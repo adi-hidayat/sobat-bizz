@@ -15,7 +15,7 @@ return new class extends Migration
             // membuat dan menghubungkan akun pengguna dari section relasinya.
             $table->foreignId('user_id')->nullable()->unique()->constrained()->cascadeOnDelete();
             $table->string('employee_number', 50)->unique();
-            $table->foreignId('department_id')->nullable()->index();
+            $table->foreignId('department_id')->nullable()->constrained('departments')->nullOnDelete();
             $table->string('photo_path')->nullable();
             $table->date('joined_at')->nullable();
             $table->timestamps();

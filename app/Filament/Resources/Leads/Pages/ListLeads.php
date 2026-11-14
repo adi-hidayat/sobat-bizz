@@ -15,6 +15,12 @@ class ListLeads extends ListRecords
     {
         parent::mount();
 
+        if (session('leads.view_mode') === 'board') {
+            $this->redirect(LeadResource::getUrl('board'));
+
+            return;
+        }
+
         session(['leads.view_mode' => 'table']);
     }
 

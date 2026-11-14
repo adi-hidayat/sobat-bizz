@@ -72,12 +72,14 @@ it('mengarahkan root ke panel admin', function () {
     $this->get('/')->assertRedirect('/admin');
 });
 
-it('menampilkan daftar lead tanpa parameter view', function () {
+it('mengingat mode lead terakhir yang dibuka', function () {
+    $this->get('/admin/leads')->assertOk();
+
     $this->get('/admin/leads/board')->assertOk();
 
-    $this->get('/admin/leads')->assertOk();
+    $this->get('/admin/leads')->assertRedirect('/admin/leads/board');
 
-    $this->get('/admin/leads')->assertOk();
+    $this->withSession(['leads.view_mode' => 'table'])->get('/admin/leads')->assertOk();
 });
 
 it('menampilkan grup sdm di sidebar', function () {
