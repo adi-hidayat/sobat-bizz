@@ -1,0 +1,12 @@
+domains:
+  - crm
+php_version: "8.5"
+node_version: "26"
+framework: laravel
+framework_version: "13"
+services:
+  - mysql
+workers:
+  - queue
+  - schedule
+  - vite
