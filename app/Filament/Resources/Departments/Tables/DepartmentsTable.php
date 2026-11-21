@@ -26,9 +26,6 @@ class DepartmentsTable
                     ->label(__('resources/department.fields.staff_count'))
                     ->counts('staff')
                     ->sortable(),
-                TextColumn::make('sort_order')
-                    ->label(__('common.fields.sort_order'))
-                    ->sortable(),
                 TextColumn::make('is_active')
                     ->label(__('common.fields.status'))
                     ->badge()
@@ -58,6 +55,7 @@ class DepartmentsTable
                     DeleteBulkAction::make(),
                 ]),
             ])
-            ->defaultSort('sort_order');
+            ->defaultSort('sort_order')
+            ->reorderable('sort_order');
     }
 }

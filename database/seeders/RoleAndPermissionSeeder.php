@@ -40,6 +40,8 @@ class RoleAndPermissionSeeder extends Seeder
         'job_title',
         'lead_source',
         'lead_rating',
+        'crm_job_title',
+        'crm_industry',
         'tax',
         'region',
     ];

@@ -21,6 +21,11 @@ class LeadRatingForm
                             ->required()
                             ->unique(ignoreRecord: true)
                             ->maxLength(255),
+                        TextInput::make('sort_order')
+                            ->label(__('common.fields.sort_order'))
+                            ->numeric()
+                            ->default(0)
+                            ->minValue(0),
                         ColorPicker::make('color')
                             ->label(__('resources/lead_rating.fields.color'))
                             ->default('#9ca3af')

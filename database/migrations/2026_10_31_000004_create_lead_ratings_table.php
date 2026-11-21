@@ -16,6 +16,7 @@ return new class extends Migration
         Schema::create('lead_ratings', function (Blueprint $table) {
             $table->id();
             $table->string('name')->unique();
+            $table->unsignedInteger('sort_order')->default(0);
             $table->string('color', 30)->default('#9ca3af');
             $table->string('text_color', 7)->default('#ffffff');
             $table->text('description')->nullable();
@@ -37,18 +38,21 @@ return new class extends Migration
         $ratings = [
             [
                 'name' => 'Hot',
+                'sort_order' => 1,
                 'color' => '#ef4444',
                 'text_color' => '#ffffff',
                 'description' => 'Prospek dengan minat tinggi dan siap ditindaklanjuti.',
             ],
             [
                 'name' => 'Warm',
+                'sort_order' => 2,
                 'color' => '#f59e0b',
                 'text_color' => '#111827',
                 'description' => 'Prospek dengan minat sedang dan masih perlu pendekatan lanjutan.',
             ],
             [
                 'name' => 'Cold',
+                'sort_order' => 3,
                 'color' => '#0ea5e9',
                 'text_color' => '#ffffff',
                 'description' => 'Prospek dengan minat rendah, belum siap membeli.',

@@ -29,11 +29,11 @@ class Lead extends Model
         'lead_type',
         'company_name',
         'contact_person',
-        'job_title',
+        'crm_job_title_id',
         'email',
         'phone',
         'address',
-        'industry',
+        'crm_industry_id',
         'lead_source_id',
         'status',
         'lead_rating_id',
@@ -114,6 +114,16 @@ class Lead extends Model
     public function rating(): BelongsTo
     {
         return $this->belongsTo(LeadRating::class, 'lead_rating_id');
+    }
+
+    public function jobTitle(): BelongsTo
+    {
+        return $this->belongsTo(CrmJobTitle::class, 'crm_job_title_id');
+    }
+
+    public function industry(): BelongsTo
+    {
+        return $this->belongsTo(CrmIndustry::class, 'crm_industry_id');
     }
 
     public function salesTeam(): BelongsToMany

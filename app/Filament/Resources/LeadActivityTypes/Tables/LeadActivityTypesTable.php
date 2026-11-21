@@ -36,10 +36,6 @@ class LeadActivityTypesTable
                     ->label(__('resources/lead_activity_type.fields.is_active'))
                     ->boolean()
                     ->sortable(),
-                TextColumn::make('sort_order')
-                    ->label(__('resources/lead_activity_type.fields.sort_order'))
-                    ->sortable()
-                    ->toggleable(),
                 TextColumn::make('activities_count')
                     ->label(__('resources/lead_activity_type.fields.activities_count'))
                     ->counts('activities')
@@ -61,6 +57,7 @@ class LeadActivityTypesTable
                     DeleteBulkAction::make(),
                 ]),
             ])
-            ->defaultSort('sort_order');
+            ->defaultSort('sort_order')
+            ->reorderable('sort_order');
     }
 }

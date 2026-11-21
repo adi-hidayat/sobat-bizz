@@ -11,7 +11,7 @@ class Quotations extends CustomerScopedPage
 {
     protected static ?string $slug = 'quotations';
 
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 5;
 
     public static function getNavigationLabel(): string
     {

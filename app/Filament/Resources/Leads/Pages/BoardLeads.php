@@ -13,6 +13,7 @@ use App\Models\Lead;
 use App\Models\LeadRating;
 use App\Models\LeadSource;
 use App\Models\User;
+use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Select;
@@ -83,7 +84,7 @@ class BoardLeads extends Page
             LeadViewModeActions::make('board'),
             Action::make('cardFields')
                 ->label(__('resources/lead.board.card_fields'))
-                ->extraAttributes(['class' => 'lead-card-fields-action-hidden'])
+                ->extraAttributes(['class' => 'lead-board-action-hidden'])
                 ->icon('heroicon-o-adjustments-horizontal')
                 ->color('gray')
                 ->slideOver()
@@ -105,6 +106,50 @@ class BoardLeads extends Page
                     ));
 
                     session(['leads.card_fields' => $this->visibleCardFields]);
+                }),
+            Action::make('filters')
+                ->label(__('resources/lead.board.filters'))
+                ->extraAttributes(['class' => 'lead-board-action-hidden'])
+                ->icon('heroicon-o-funnel')
+                ->color('gray')
+                ->slideOver()
+                ->modalHeading(__('resources/lead.board.filters'))
+                ->modalDescription(__('resources/lead.board.filters_description'))
+                ->modalSubmitActionLabel(__('resources/lead.board.apply_filters'))
+                ->form([
+                    Select::make('assignedTo')
+                        ->label(__('resources/lead.fields.sales'))
+                        ->placeholder(__('resources/lead.board.all_sales'))
+                        ->options(fn (): array => $this->getUserOptions())
+                        ->searchable()
+                        ->allowHtml()
+                        ->default(fn (): ?string => $this->assignedTo),
+                    Select::make('leadSourceId')
+                        ->label(__('resources/lead.fields.source'))
+                        ->placeholder(__('resources/lead.board.all_sources'))
+                        ->options(fn (): array => $this->getLeadSourceOptions())
+                        ->searchable()
+                        ->default(fn (): ?string => $this->leadSourceId),
+                    Select::make('leadRatingId')
+                        ->label(__('resources/lead.fields.rating'))
+                        ->placeholder(__('resources/lead.board.all_ratings'))
+                        ->options(fn (): array => LeadRating::query()->ordered()->pluck('name', 'id')->all())
+                        ->searchable()
+                        ->default(fn (): ?string => $this->leadRatingId),
+                    Select::make('leadType')
+                        ->label(__('resources/lead.fields.lead_type'))
+                        ->placeholder(__('resources/lead.board.all_types'))
+                        ->options(LeadType::class)
+                        ->searchable()
+                        ->default(fn (): ?string => $this->leadType),
+                ])
+                ->action(function (array $data): void {
+                    $this->assignedTo = $this->filterValue($data['assignedTo'] ?? null);
+                    $this->leadSourceId = $this->filterValue($data['leadSourceId'] ?? null);
+                    $this->leadRatingId = $this->filterValue($data['leadRatingId'] ?? null);
+                    $this->leadType = $this->filterValue($data['leadType'] ?? null);
+
+                    $this->loadedCounts = [];
                 }),
             Action::make('create')
                 ->label(__('resources/lead.actions.create'))
@@ -134,6 +179,18 @@ class BoardLeads extends Page
     public function openCardFields(): void
     {
         $this->mountAction('cardFields');
+    }
+
+    public function openFilters(): void
+    {
+        $this->mountAction('filters');
+    }
+
+    public function activeFilterCount(): int
+    {
+        return collect([$this->assignedTo, $this->leadSourceId, $this->leadRatingId, $this->leadType])
+            ->filter(fn (?string $value): bool => filled($value))
+            ->count();
     }
 
     /**
@@ -173,39 +230,17 @@ class BoardLeads extends Page
                             ->action(fn () => $this->search = '')
                             ->visible(fn (): bool => filled($this->search)),
                     )
-                    ->live(debounce: 400)
-                    ->columnSpan(['default' => 1, 'md' => 2]),
-                Select::make('assignedTo')
-                    ->hiddenLabel()
-                    ->placeholder(__('resources/lead.board.all_sales'))
-                    ->suffixIcon('heroicon-o-users')
-                    ->options(fn (): array => $this->getUserOptions())
-                    ->searchable()
-                    ->allowHtml()
-                    ->live(),
-                Select::make('leadSourceId')
-                    ->hiddenLabel()
-                    ->placeholder(__('resources/lead.board.all_sources'))
-                    ->suffixIcon('heroicon-o-megaphone')
-                    ->options(fn (): array => $this->getLeadSourceOptions())
-                    ->searchable()
-                    ->live(),
-                Select::make('leadRatingId')
-                    ->hiddenLabel()
-                    ->placeholder(__('resources/lead.board.all_ratings'))
-                    ->suffixIcon('heroicon-o-star')
-                    ->options(fn (): array => LeadRating::query()->orderBy('name')->pluck('name', 'id')->all())
-                    ->searchable()
-                    ->live(),
-                Select::make('leadType')
-                    ->hiddenLabel()
-                    ->placeholder(__('resources/lead.board.all_types'))
-                    ->suffixIcon('heroicon-o-building-office-2')
-                    ->options(LeadType::class)
-                    ->searchable()
-                    ->live(),
-            ])
-            ->columns(['default' => 1, 'md' => 6]);
+                    ->live(debounce: 400),
+            ]);
+    }
+
+    private function filterValue(mixed $value): ?string
+    {
+        if ($value instanceof BackedEnum) {
+            $value = $value->value;
+        }
+
+        return filled($value) ? (string) $value : null;
     }
 
     /**

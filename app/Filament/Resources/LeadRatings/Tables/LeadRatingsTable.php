@@ -70,6 +70,7 @@ class LeadRatingsTable
                     DeleteBulkAction::make(),
                 ]),
             ])
-            ->defaultSort('name');
+            ->defaultSort('sort_order')
+            ->reorderable('sort_order');
     }
 }

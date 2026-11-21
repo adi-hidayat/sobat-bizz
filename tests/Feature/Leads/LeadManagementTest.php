@@ -9,6 +9,8 @@ use App\Filament\Resources\Leads\Pages\EditLead;
 use App\Filament\Resources\Leads\Pages\ListLeads;
 use App\Filament\Resources\Leads\Pages\ViewLead;
 use App\Filament\Resources\Leads\RelationManagers\ActivitiesRelationManager;
+use App\Models\CrmIndustry;
+use App\Models\CrmJobTitle;
 use App\Models\Lead;
 use App\Models\LeadActivity;
 use App\Models\LeadActivityType;
@@ -66,6 +68,38 @@ it('membuat lead perorangan tanpa nama perusahaan', function () {
         ->and($lead->rating?->name)->toBe('Hot')
         ->and((float) $lead->estimated_value)->toBe(5_000_000.0)
         ->and($lead->expected_close_date)->not->toBeNull();
+});
+
+it('memakai jabatan lead dan industri dari master data', function () {
+    $source = LeadSource::factory()->create();
+    $jobTitle = CrmJobTitle::factory()->create(['name' => 'Procurement Manager']);
+    $industry = CrmIndustry::factory()->create(['name' => 'Manufaktur']);
+
+    livewire(CreateLead::class)
+        ->fillForm([
+            'lead_type' => LeadType::Company->value,
+            'company_name' => 'PT Sinar Industri',
+            'crm_job_title_id' => $jobTitle->getKey(),
+            'crm_industry_id' => $industry->getKey(),
+            'lead_source_id' => $source->getKey(),
+            'status' => LeadStatus::New->value,
+        ])
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    $lead = Lead::query()->latest('id')->firstOrFail();
+
+    expect($lead->jobTitle?->name)->toBe('Procurement Manager')
+        ->and($lead->industry?->name)->toBe('Manufaktur');
+});
+
+it('membuat jabatan lead dan industri baru dari select form lead', function () {
+    livewire(CreateLead::class)
+        ->callFormComponentAction('crm_job_title_id', 'createOption', ['name' => 'Kepala Gudang'])
+        ->callFormComponentAction('crm_industry_id', 'createOption', ['name' => 'Perhotelan']);
+
+    expect(CrmJobTitle::query()->where('name', 'Kepala Gudang')->exists())->toBeTrue()
+        ->and(CrmIndustry::query()->where('name', 'Perhotelan')->exists())->toBeTrue();
 });
 
 it('mewajibkan nama perusahaan untuk lead bertipe perusahaan', function () {
@@ -236,10 +270,12 @@ it('menyaring lead berdasarkan sales yang dipilih', function () {
 });
 
 it('mengonversi lead perorangan menjadi customer perorangan beserta kontak utama', function () {
+    $jobTitle = CrmJobTitle::factory()->create(['name' => 'Owner']);
+
     $lead = Lead::factory()->individual()->qualified()->create([
         'company_name' => null,
         'contact_person' => 'Rina Wijaya',
-        'job_title' => 'Owner',
+        'crm_job_title_id' => $jobTitle->getKey(),
         'email' => 'rina@example.com',
         'phone' => '081234567890',
     ]);

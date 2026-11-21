@@ -14,11 +14,11 @@ return new class extends Migration
             $table->string('lead_type', 20)->default('company');
             $table->string('company_name')->nullable();
             $table->string('contact_person')->nullable();
-            $table->string('job_title')->nullable();
+            $table->foreignId('crm_job_title_id')->nullable()->constrained('crm_job_titles')->nullOnDelete();
             $table->string('email')->nullable();
             $table->string('phone', 50)->nullable();
             $table->text('address')->nullable();
-            $table->string('industry')->nullable();
+            $table->foreignId('crm_industry_id')->nullable()->constrained('crm_industries')->nullOnDelete();
             $table->foreignId('lead_source_id')->nullable()->constrained('lead_sources')->nullOnDelete();
             $table->string('status', 30)->default('new');
             $table->foreignId('lead_rating_id')->nullable()->constrained('lead_ratings')->nullOnDelete();

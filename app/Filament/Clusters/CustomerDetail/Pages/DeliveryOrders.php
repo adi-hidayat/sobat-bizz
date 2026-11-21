@@ -11,7 +11,7 @@ class DeliveryOrders extends CustomerScopedPage
 {
     protected static ?string $slug = 'delivery-orders';
 
-    protected static ?int $navigationSort = 5;
+    protected static ?int $navigationSort = 7;
 
     public static function getNavigationLabel(): string
     {

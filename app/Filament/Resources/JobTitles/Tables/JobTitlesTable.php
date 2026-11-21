@@ -26,9 +26,6 @@ class JobTitlesTable
                     ->label(__('resources/job_title.fields.users_count'))
                     ->counts('users')
                     ->sortable(),
-                TextColumn::make('sort_order')
-                    ->label(__('common.fields.sort_order'))
-                    ->sortable(),
                 TextColumn::make('is_active')
                     ->label(__('common.fields.status'))
                     ->badge()
@@ -58,6 +55,7 @@ class JobTitlesTable
                     DeleteBulkAction::make(),
                 ]),
             ])
-            ->defaultSort('sort_order');
+            ->defaultSort('sort_order')
+            ->reorderable('sort_order');
     }
 }

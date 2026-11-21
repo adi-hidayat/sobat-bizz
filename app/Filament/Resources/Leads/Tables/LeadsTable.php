@@ -6,8 +6,8 @@ use App\Actions\ConvertLeadToCustomer;
 use App\Enums\LeadStatus;
 use App\Enums\LeadType;
 use App\Filament\Actions\TableActions;
+use App\Filament\Clusters\LeadDetailCluster;
 use App\Filament\Resources\Customers\CustomerResource;
-use App\Filament\Resources\Leads\LeadResource;
 use App\Filament\Support\UserAvatar;
 use App\Models\Lead;
 use App\Models\User;
@@ -52,7 +52,7 @@ class LeadsTable
                     ->label(__('resources/lead.fields.lead_type'))
                     ->badge()
                     ->toggleable(),
-                TextColumn::make('job_title')
+                TextColumn::make('jobTitle.name')
                     ->label(__('common.fields.job_title'))
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('rating.name')
@@ -156,7 +156,7 @@ class LeadsTable
             ->recordActions([
                 TableActions::group([
                     ViewAction::make(),
-                    TableActions::detail(fn (Lead $record): string => LeadResource::getUrl('view', ['record' => $record])),
+                    TableActions::detail(fn (Lead $record): string => LeadDetailCluster::getUrl(['lead' => $record->getKey()])),
                     EditAction::make(),
                     Action::make('convert')
                         ->label(__('resources/lead.actions.convert'))

@@ -2,11 +2,15 @@
 
 use App\Enums\LeadActivityGroup;
 use App\Enums\TaxType;
+use App\Filament\Resources\CrmIndustries\Pages\ListCrmIndustries;
+use App\Filament\Resources\CrmJobTitles\Pages\ListCrmJobTitles;
 use App\Filament\Resources\LeadActivityTypes\Pages\ListLeadActivityTypes;
 use App\Filament\Resources\Leads\Pages\CreateLead;
 use App\Filament\Resources\LeadSources\Pages\ListLeadSources;
 use App\Filament\Resources\ProductCategories\Pages\ListProductCategories;
 use App\Filament\Resources\Taxes\Pages\ListTaxes;
+use App\Models\CrmIndustry;
+use App\Models\CrmJobTitle;
 use App\Models\Lead;
 use App\Models\LeadActivityType;
 use App\Models\LeadSource;
@@ -45,6 +49,8 @@ it('merender halaman master data setup', function (string $page) {
     livewire($page)->assertOk();
 })->with([
     ListLeadSources::class,
+    ListCrmIndustries::class,
+    ListCrmJobTitles::class,
     ListTaxes::class,
     ListProductCategories::class,
 ]);
@@ -94,6 +100,27 @@ it('membuat sumber lead baru dari modal', function () {
         ->assertHasNoActionErrors();
 
     expect(LeadSource::query()->where('name', 'Google Ads')->exists())->toBeTrue();
+});
+
+it('membuat industri dan jabatan lead dari halaman setup', function () {
+    livewire(ListCrmIndustries::class)
+        ->callAction('create', [
+            'name' => 'Perhotelan',
+            'sort_order' => 7,
+            'is_active' => true,
+        ])
+        ->assertHasNoActionErrors();
+
+    livewire(ListCrmJobTitles::class)
+        ->callAction('create', [
+            'name' => 'Kepala Gudang',
+            'sort_order' => 7,
+            'is_active' => true,
+        ])
+        ->assertHasNoActionErrors();
+
+    expect(CrmIndustry::query()->where('name', 'Perhotelan')->exists())->toBeTrue()
+        ->and(CrmJobTitle::query()->where('name', 'Kepala Gudang')->exists())->toBeTrue();
 });
 
 it('membuat pajak percentage dan menghitung nilainya', function () {

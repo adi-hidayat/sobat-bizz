@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\LeadStatus;
+use App\Enums\LeadType;
 use App\Filament\Resources\Leads\Pages\BoardLeads;
 use App\Models\Customer;
 use App\Models\Lead;
@@ -223,6 +224,18 @@ it('menyaring board berdasarkan owner atau anggota tim sales', function () {
         ->set('assignedTo', (string) $member->getKey())
         ->assertSee('Team Lead Co')
         ->assertDontSee('Owner Lead Co');
+});
+
+it('menyaring board lewat slide-over filter', function () {
+    Lead::factory()->create(['company_name' => 'Lead Perusahaan Co', 'lead_type' => LeadType::Company]);
+    Lead::factory()->create(['company_name' => 'Lead Perorangan Co', 'lead_type' => LeadType::Individual]);
+
+    livewire(BoardLeads::class)
+        ->callAction('filters', ['leadType' => LeadType::Company->value])
+        ->assertSet('leadType', LeadType::Company->value)
+        ->assertSee('Lead Perusahaan Co')
+        ->assertDontSee('Lead Perorangan Co')
+        ->assertSeeHtml('fi-btn-badge-ctn');
 });
 
 it('membatasi 25 kartu per kolom dan memuat lagi saat diminta', function () {

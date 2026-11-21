@@ -28,6 +28,13 @@ return [
         ],
     ],
 
+    'lead_detail' => [
+        'title' => 'Detail Lead',
+        'information' => 'Informasi',
+        'contact' => 'Kontak',
+        'activities' => 'Aktivitas',
+    ],
+
     'setup' => [
         'title' => 'Setup',
     ],

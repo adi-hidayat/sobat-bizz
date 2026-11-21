@@ -14,6 +14,8 @@ return [
         'information' => 'Lead Information',
         'identity' => 'Lead Identity',
         'qualification' => 'Qualification & Follow-up',
+        'contact' => 'Contact',
+        'address' => 'Address',
         'contact_and_address' => 'Contact & Address',
     ],
 
@@ -80,6 +82,9 @@ return [
         'you_option' => ':name (You)',
         'card_fields' => 'Card information',
         'card_fields_description' => 'Choose which information should be displayed on each lead card.',
+        'filters' => 'Filter',
+        'filters_description' => 'Narrow the pipeline by sales, source, rating, or type.',
+        'apply_filters' => 'Apply filter',
         'load_more' => 'Showing :loaded of :total — scroll to load more',
         'empty_column' => 'No leads yet.',
         'move' => 'Move to',

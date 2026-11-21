@@ -49,9 +49,6 @@ class TaxesTable
                     ->badge()
                     ->formatStateUsing(fn (bool $state): string => $state ? __('resources/tax.boolean.yes') : __('resources/tax.boolean.no'))
                     ->color(fn (bool $state): string => $state ? 'info' : 'gray'),
-                TextColumn::make('sort_order')
-                    ->label(__('common.fields.sort_order'))
-                    ->sortable(),
                 TextColumn::make('is_active')
                     ->label(__('common.fields.status'))
                     ->badge()
@@ -89,6 +86,7 @@ class TaxesTable
                     DeleteBulkAction::make(),
                 ]),
             ])
-            ->defaultSort('sort_order');
+            ->defaultSort('sort_order')
+            ->reorderable('sort_order');
     }
 }

@@ -2,6 +2,8 @@
 
 use App\Filament\Resources\Cities\Pages\ListCities;
 use App\Filament\Resources\Countries\Pages\ListCountries;
+use App\Filament\Resources\CrmIndustries\Pages\ListCrmIndustries;
+use App\Filament\Resources\CrmJobTitles\Pages\ListCrmJobTitles;
 use App\Filament\Resources\Customers\Pages\ListCustomers;
 use App\Filament\Resources\DeliveryOrders\Pages\ListDeliveryOrders;
 use App\Filament\Resources\Departments\Pages\ListDepartments;
@@ -63,6 +65,8 @@ it('merender halaman daftar utama', function (string $page) {
     ListTaxes::class,
     ListDepartments::class,
     ListJobTitles::class,
+    ListCrmIndustries::class,
+    ListCrmJobTitles::class,
     ListCountries::class,
     ListStates::class,
     ListCities::class,

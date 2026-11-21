@@ -11,7 +11,7 @@ class Proposals extends CustomerScopedPage
 {
     protected static ?string $slug = 'proposals';
 
-    protected static ?int $navigationSort = 2;
+    protected static ?int $navigationSort = 4;
 
     public static function getNavigationLabel(): string
     {

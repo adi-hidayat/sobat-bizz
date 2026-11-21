@@ -1,5 +1,5 @@
 @use('App\Enums\LeadStatus')
-@use('App\Filament\Resources\Leads\LeadResource')
+@use('App\Filament\Clusters\LeadDetailCluster')
 
 <x-filament-panels::page>
     <style>
@@ -46,12 +46,12 @@
             min-width: 0;
         }
 
-        .lead-board-card-fields-toggle {
+        .lead-board-toolbar-action {
             flex: none;
             margin-top: 0;
         }
 
-        .lead-card-fields-action-hidden {
+        .lead-board-action-hidden {
             display: none !important;
         }
 
@@ -64,48 +64,14 @@
         }
 
         .lead-board-toolbar .fi-sc > .fi-grid-col {
-            flex: 1 1 10rem;
-            min-width: 10rem;
+            flex: 1 1 100%;
+            min-width: 0;
         }
 
-        .lead-board-toolbar .fi-sc > .fi-grid-col:first-child {
-            flex: 2 1 16rem;
-            min-width: 10rem;
-        }
-
-        @container (max-width: 1200px) {
-            .lead-board-toolbar .fi-sc > .fi-grid-col:first-child {
-                flex-basis: 100%;
-            }
-        }
-
-        .lead-board-toolbar .fi-input,
-        .lead-board-toolbar .fi-select-input-btn,
-        .lead-board-toolbar .fi-select-input-placeholder,
-        .lead-board-toolbar .fi-select-input-value-label,
-        .lead-board-toolbar .fi-select-input-value-ctn {
+        .lead-board-toolbar .fi-input {
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-        }
-
-        .lead-board-toolbar .fi-select-input-value-ctn {
-            min-width: 0;
-            line-height: 1;
-        }
-
-        .lead-board-toolbar .fi-select-input-btn {
-            height: 2.25rem;
-            min-height: 2.25rem;
-            line-height: 1;
-        }
-
-        .lead-board-toolbar .fi-select-input-btn span {
-            line-height: 1;
-        }
-
-        .lead-board-toolbar .fi-select-input-btn img {
-            display: block;
         }
 
         .lead-board-columns {
@@ -713,11 +679,20 @@
             </div>
 
             <x-filament::button
+                :tooltip="__('resources/lead.board.filters')"
+                :badge="$this->activeFilterCount() ?: null"
+                icon="heroicon-o-funnel"
+                color="gray"
+                wire:click="openFilters"
+                class="lead-board-toolbar-action"
+            />
+
+            <x-filament::button
                 :tooltip="__('resources/lead.board.card_fields')"
                 icon="heroicon-o-view-columns"
                 color="gray"
                 wire:click="openCardFields"
-                class="lead-board-card-fields-toggle"
+                class="lead-board-toolbar-action"
             />
         </div>
 
@@ -773,7 +748,7 @@
                                     <div class="lead-board-card-top">
                                         @if ($this->showCardField('name'))
                                             <a
-                                                href="{{ LeadResource::getUrl('view', ['record' => $lead]) }}"
+                                                href="{{ LeadDetailCluster::getUrl(['lead' => $lead->getKey()]) }}"
                                                 class="lead-board-card-title"
                                             >
                                                 {{ $lead->display_name }}

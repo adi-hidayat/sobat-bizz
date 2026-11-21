@@ -14,6 +14,8 @@ return [
         'information' => 'Informasi Lead',
         'identity' => 'Identitas Lead',
         'qualification' => 'Kualifikasi & Follow-up',
+        'contact' => 'Kontak',
+        'address' => 'Alamat',
         'contact_and_address' => 'Kontak & Alamat',
     ],
 
@@ -80,6 +82,9 @@ return [
         'you_option' => ':name (Anda)',
         'card_fields' => 'Informasi kartu',
         'card_fields_description' => 'Pilih informasi yang ingin ditampilkan pada kartu lead.',
+        'filters' => 'Filter',
+        'filters_description' => 'Persempit pipeline berdasarkan sales, sumber, rating, atau tipe.',
+        'apply_filters' => 'Terapkan filter',
         'load_more' => 'Menampilkan :loaded dari :total — gulir untuk memuat lagi',
         'empty_column' => 'Belum ada lead.',
         'move' => 'Pindahkan',

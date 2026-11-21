@@ -4,6 +4,8 @@ namespace Database\Factories;
 
 use App\Enums\LeadStatus;
 use App\Enums\LeadType;
+use App\Models\CrmIndustry;
+use App\Models\CrmJobTitle;
 use App\Models\Lead;
 use App\Models\LeadRating;
 use App\Models\LeadSource;
@@ -26,11 +28,11 @@ class LeadFactory extends Factory
             'lead_type' => LeadType::Company,
             'company_name' => fake()->company(),
             'contact_person' => fake()->name(),
-            'job_title' => fake()->jobTitle(),
+            'crm_job_title_id' => CrmJobTitle::query()->inRandomOrder()->value('id') ?? CrmJobTitle::factory(),
             'email' => fake()->unique()->companyEmail(),
             'phone' => fake()->numerify('08##########'),
             'address' => fake()->address(),
-            'industry' => fake()->randomElement(['Teknologi', 'Manufaktur', 'Retail', 'Konstruksi', 'Perbankan']),
+            'crm_industry_id' => CrmIndustry::query()->inRandomOrder()->value('id') ?? CrmIndustry::factory(),
             'lead_source_id' => LeadSource::factory(),
             'status' => LeadStatus::New,
             'lead_rating_id' => LeadRating::query()->inRandomOrder()->value('id')

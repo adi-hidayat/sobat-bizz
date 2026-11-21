@@ -11,7 +11,7 @@ class IncomingPos extends CustomerScopedPage
 {
     protected static ?string $slug = 'incoming-pos';
 
-    protected static ?int $navigationSort = 4;
+    protected static ?int $navigationSort = 6;
 
     public static function getNavigationLabel(): string
     {

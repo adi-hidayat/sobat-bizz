@@ -38,6 +38,8 @@ class LeadRatingInfolist
                 TextEntry::make('leads_count')
                     ->label(__('resources/lead_rating.fields.leads_count'))
                     ->state(fn (LeadRating $record): int => $record->leads()->count()),
+                TextEntry::make('sort_order')
+                    ->label(__('common.fields.sort_order')),
                 TextEntry::make('description')
                     ->label(__('common.fields.description'))
                     ->placeholder(__('common.placeholders.none'))

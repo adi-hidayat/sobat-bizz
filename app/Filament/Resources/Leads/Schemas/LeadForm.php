@@ -4,6 +4,8 @@ namespace App\Filament\Resources\Leads\Schemas;
 
 use App\Enums\LeadStatus;
 use App\Enums\LeadType;
+use App\Models\CrmIndustry;
+use App\Models\CrmJobTitle;
 use App\Models\LeadSource;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
@@ -51,12 +53,48 @@ class LeadForm
                                                 : __('resources/lead.fields.contact_person'))
                                             ->required(fn (Get $get): bool => self::hasType($get, LeadType::Individual))
                                             ->maxLength(255),
-                                        TextInput::make('job_title')
+                                        Select::make('crm_job_title_id')
                                             ->label(__('common.fields.job_title'))
-                                            ->maxLength(255),
-                                        TextInput::make('industry')
+                                            ->relationship(
+                                                'jobTitle',
+                                                'name',
+                                                modifyQueryUsing: fn (Builder $query): Builder => $query
+                                                    ->orderByDesc('is_active')
+                                                    ->ordered(),
+                                            )
+                                            ->getOptionLabelFromRecordUsing(fn (CrmJobTitle $record): string => $record->is_active
+                                                ? $record->name
+                                                : __('resources/lead.options.inactive', ['name' => $record->name]))
+                                            ->searchable()
+                                            ->preload()
+                                            ->createOptionForm([
+                                                TextInput::make('name')
+                                                    ->label(__('resources/crm_job_title.fields.name'))
+                                                    ->required()
+                                                    ->unique(ignoreRecord: true)
+                                                    ->maxLength(255),
+                                            ]),
+                                        Select::make('crm_industry_id')
                                             ->label(__('common.fields.industry'))
-                                            ->maxLength(255),
+                                            ->relationship(
+                                                'industry',
+                                                'name',
+                                                modifyQueryUsing: fn (Builder $query): Builder => $query
+                                                    ->orderByDesc('is_active')
+                                                    ->ordered(),
+                                            )
+                                            ->getOptionLabelFromRecordUsing(fn (CrmIndustry $record): string => $record->is_active
+                                                ? $record->name
+                                                : __('resources/lead.options.inactive', ['name' => $record->name]))
+                                            ->searchable()
+                                            ->preload()
+                                            ->createOptionForm([
+                                                TextInput::make('name')
+                                                    ->label(__('resources/crm_industry.fields.name'))
+                                                    ->required()
+                                                    ->unique(ignoreRecord: true)
+                                                    ->maxLength(255),
+                                            ]),
                                     ])
                                     ->columns(2),
 
@@ -70,7 +108,11 @@ class LeadForm
                                             ->live(),
                                         Select::make('lead_rating_id')
                                             ->label(__('resources/lead.fields.rating'))
-                                            ->relationship('rating', 'name')
+                                            ->relationship(
+                                                'rating',
+                                                'name',
+                                                modifyQueryUsing: fn (Builder $query): Builder => $query->ordered(),
+                                            )
                                             ->searchable()
                                             ->preload(),
                                         Select::make('lead_source_id')

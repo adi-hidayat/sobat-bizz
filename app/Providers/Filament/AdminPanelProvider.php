@@ -34,7 +34,7 @@ class AdminPanelProvider extends PanelProvider
             ->brandLogo(asset('images/logo.webp'))
             ->brandLogoHeight('2rem')
             ->colors([
-                'primary' => Color::Emerald,
+                'primary' => Color::Blue,
             ])
             ->navigationGroups(NavigationGroup::class)
             ->maxContentWidth('full')
@@ -72,6 +72,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->middleware([
                 SetLocale::class,
-            ], isPersistent: true);
+            ], isPersistent: true)
+            ->spa();
     }
 }

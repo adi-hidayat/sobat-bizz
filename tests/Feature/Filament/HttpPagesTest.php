@@ -29,6 +29,8 @@ it('merender seluruh halaman index melalui http', function (string $path) {
     '/admin/setup/lead-ratings',
     '/admin/setup/departments',
     '/admin/setup/job-titles',
+    '/admin/setup/crm-job-titles',
+    '/admin/setup/crm-industries',
     '/admin/proposals',
     '/admin/quotations',
     '/admin/incoming-pos',
@@ -62,7 +64,7 @@ it('merender halaman detail melalui http', function () {
     $proposal = Proposal::factory()->create(['customer_id' => $customer->getKey()]);
     $invoice = Invoice::factory()->create(['customer_id' => $customer->getKey()]);
 
-    $this->get("/admin/leads/{$lead->getKey()}")->assertOk();
+    $this->get("/admin/leads/{$lead->getKey()}")->assertRedirect("/admin/lead-detail/{$lead->getKey()}/information");
     $this->get("/admin/customers/{$customer->getKey()}")->assertOk();
     $this->get("/admin/proposals/{$proposal->getKey()}")->assertOk();
     $this->get("/admin/invoice/invoices/{$invoice->getKey()}")->assertOk();

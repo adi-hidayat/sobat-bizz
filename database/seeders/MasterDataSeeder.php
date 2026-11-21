@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Address;
 use App\Models\Contact;
+use App\Models\CrmIndustry;
 use App\Models\Customer;
 use App\Models\Lead;
 use App\Models\LeadSource;
@@ -91,7 +92,7 @@ class MasterDataSeeder extends Seeder
                 'email' => strtolower(str_replace(' ', '.', $lead['name'])).'@example.test',
                 'phone' => '081200000001',
                 'address' => 'Jakarta',
-                'industry' => 'Retail',
+                'crm_industry_id' => CrmIndustry::query()->firstOrCreate(['name' => 'Retail'])->getKey(),
                 'lead_source_id' => $leadSources[$lead['source']] ?? null,
                 'status' => $lead['status'],
                 'follow_up_date' => now()->addDays(3),

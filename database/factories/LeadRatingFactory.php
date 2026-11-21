@@ -33,6 +33,7 @@ class LeadRatingFactory extends Factory
             'color' => $color,
             'text_color' => $textColor,
             'description' => fake()->optional()->sentence(),
+            'sort_order' => fake()->numberBetween(0, 100),
         ];
     }
 }

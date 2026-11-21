@@ -38,6 +38,8 @@ it('merender seluruh menu cluster customer detail', function (string $slug) {
         ->assertOk()
         ->assertSee('fi-page-has-sub-navigation', false)
         ->assertSee('Customer Information')
+        ->assertSee('Alamat')
+        ->assertSee('Kontak')
         ->assertSee('Proposal')
         ->assertSee('Quotation')
         ->assertSee('Incoming PO')
@@ -45,6 +47,8 @@ it('merender seluruh menu cluster customer detail', function (string $slug) {
         ->assertSee('Invoice');
 })->with([
     'information',
+    'addresses',
+    'contacts',
     'proposals',
     'quotations',
     'incoming-pos',
@@ -52,7 +56,18 @@ it('merender seluruh menu cluster customer detail', function (string $slug) {
     'invoices',
 ]);
 
-it('menampilkan tab detail, alamat dan contact pada customer information', function () {
+it('menampilkan detail customer pada menu information', function () {
+    $customer = Customer::factory()->create([
+        'company_name' => 'PT Uji Customer',
+    ]);
+
+    $this->get("/admin/customer-detail/{$customer->getKey()}/information")
+        ->assertOk()
+        ->assertSee($customer->customer_code)
+        ->assertSee('PT Uji Customer');
+});
+
+it('menampilkan alamat customer pada menu alamat', function () {
     $customer = Customer::factory()->create();
 
     $customer->addresses()->create([
@@ -71,6 +86,17 @@ it('menampilkan tab detail, alamat dan contact pada customer information', funct
         'is_primary' => true,
     ]);
 
+    $this->get("/admin/customer-detail/{$customer->getKey()}/addresses")
+        ->assertOk()
+        ->assertSee('Kantor Pusat')
+        ->assertSee('Jl. Penagihan No. 1')
+        ->assertSee('Gudang')
+        ->assertSee('Jl. Pengiriman No. 2');
+});
+
+it('menampilkan kontak customer pada menu kontak', function () {
+    $customer = Customer::factory()->create();
+
     $customer->contacts()->create([
         'name' => 'Budi Santoso',
         'position' => 'Procurement',
@@ -78,14 +104,10 @@ it('menampilkan tab detail, alamat dan contact pada customer information', funct
         'is_primary' => true,
     ]);
 
-    $this->get("/admin/customer-detail/{$customer->getKey()}/information")
+    $this->get("/admin/customer-detail/{$customer->getKey()}/contacts")
         ->assertOk()
-        ->assertSee('Detail')
-        ->assertSee('Alamat')
-        ->assertSee('Contact')
-        ->assertSee('Jl. Penagihan No. 1')
-        ->assertSee('Jl. Pengiriman No. 2')
-        ->assertSee('Budi Santoso');
+        ->assertSee('Budi Santoso')
+        ->assertSee('Procurement');
 });
 
 it('hanya menampilkan proposal milik customer yang sedang dibuka', function () {

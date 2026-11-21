@@ -13,6 +13,7 @@ class LeadRatingSeeder extends Seeder
             [
                 'name' => '🔥 Hot',
                 'legacy_name' => 'Hot',
+                'sort_order' => 1,
                 'color' => '#ef4444',
                 'text_color' => '#ffffff',
                 'description' => 'Prospek dengan minat tinggi dan siap ditindaklanjuti.',
@@ -20,6 +21,7 @@ class LeadRatingSeeder extends Seeder
             [
                 'name' => '🌤️ Warm',
                 'legacy_name' => 'Warm',
+                'sort_order' => 2,
                 'color' => '#f59e0b',
                 'text_color' => '#111827',
                 'description' => 'Prospek dengan minat sedang dan masih perlu pendekatan lanjutan.',
@@ -27,6 +29,7 @@ class LeadRatingSeeder extends Seeder
             [
                 'name' => '❄️ Cold',
                 'legacy_name' => 'Cold',
+                'sort_order' => 3,
                 'color' => '#0ea5e9',
                 'text_color' => '#ffffff',
                 'description' => 'Prospek dengan minat rendah, belum siap membeli.',
@@ -44,6 +47,7 @@ class LeadRatingSeeder extends Seeder
                     'color' => $rating['color'],
                     'text_color' => $rating['text_color'],
                     'description' => $rating['description'],
+                    'sort_order' => $rating['sort_order'],
                 ]);
 
                 continue;
@@ -54,6 +58,7 @@ class LeadRatingSeeder extends Seeder
                 'color' => $rating['color'],
                 'text_color' => $rating['text_color'],
                 'description' => $rating['description'],
+                'sort_order' => $rating['sort_order'],
             ]);
         }
     }

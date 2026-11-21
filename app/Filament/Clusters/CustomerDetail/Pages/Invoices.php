@@ -11,7 +11,7 @@ class Invoices extends CustomerScopedPage
 {
     protected static ?string $slug = 'invoices';
 
-    protected static ?int $navigationSort = 6;
+    protected static ?int $navigationSort = 8;
 
     public static function getNavigationLabel(): string
     {

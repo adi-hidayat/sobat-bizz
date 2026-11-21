@@ -7,8 +7,6 @@ use App\Filament\Resources\Leads\Pages\CreateLead;
 use App\Filament\Resources\Leads\Pages\EditLead;
 use App\Filament\Resources\Leads\Pages\ListLeads;
 use App\Filament\Resources\Leads\Pages\ViewLead;
-use App\Filament\Resources\Leads\RelationManagers\ActivitiesRelationManager;
-use App\Filament\Resources\Leads\RelationManagers\ContactsRelationManager;
 use App\Filament\Resources\Leads\Schemas\LeadForm;
 use App\Filament\Resources\Leads\Schemas\LeadInfolist;
 use App\Filament\Resources\Leads\Tables\LeadsTable;
@@ -58,14 +56,6 @@ class LeadResource extends Resource
     public static function table(Table $table): Table
     {
         return LeadsTable::configure($table);
-    }
-
-    public static function getRelations(): array
-    {
-        return [
-            ActivitiesRelationManager::class,
-            ContactsRelationManager::class,
-        ];
     }
 
     public static function getPages(): array

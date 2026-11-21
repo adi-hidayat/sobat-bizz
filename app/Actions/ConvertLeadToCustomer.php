@@ -64,7 +64,7 @@ final class ConvertLeadToCustomer
                 if (filled($lead->contact_person)) {
                     $customer->contacts()->create([
                         'name' => $lead->contact_person,
-                        'position' => $lead->job_title,
+                        'position' => $lead->jobTitle?->name,
                         'email' => $lead->email,
                         'phone' => $lead->phone,
                         'is_primary' => true,

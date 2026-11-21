@@ -2,8 +2,8 @@
 
 return [
 
-    'model_label' => 'Desa / Kelurahan',
+    'model_label' => 'Desa',
 
-    'plural_model_label' => 'Desa / Kelurahan',
+    'plural_model_label' => 'Desa',
 
 ];

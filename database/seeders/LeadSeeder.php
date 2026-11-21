@@ -4,6 +4,8 @@ namespace Database\Seeders;
 
 use App\Enums\LeadStatus;
 use App\Enums\LeadType;
+use App\Models\CrmIndustry;
+use App\Models\CrmJobTitle;
 use App\Models\Lead;
 use App\Models\LeadRating;
 use App\Models\LeadSource;
@@ -28,7 +30,17 @@ class LeadSeeder extends Seeder
             $ratingIds = collect([LeadRating::factory()->create()->getKey()]);
         }
 
-        $industries = ['Teknologi', 'Manufaktur', 'Retail', 'Konstruksi', 'Perbankan', 'Logistik', 'Kesehatan', 'Pendidikan'];
+        $jobTitleIds = CrmJobTitle::query()->pluck('id');
+
+        if ($jobTitleIds->isEmpty()) {
+            $jobTitleIds = collect([CrmJobTitle::factory()->create()->getKey()]);
+        }
+
+        $industryIds = CrmIndustry::query()->pluck('id');
+
+        if ($industryIds->isEmpty()) {
+            $industryIds = collect([CrmIndustry::factory()->create()->getKey()]);
+        }
 
         foreach (LeadStatus::cases() as $status) {
             $count = fake()->numberBetween(10, 20);
@@ -43,10 +55,10 @@ class LeadSeeder extends Seeder
                         'lead_type' => $isCompany ? LeadType::Company : LeadType::Individual,
                         'company_name' => $isCompany ? fake()->company() : null,
                         'contact_person' => fake()->name(),
-                        'job_title' => fake()->jobTitle(),
+                        'crm_job_title_id' => $jobTitleIds->random(),
                         'phone' => fake()->numerify('08##########'),
                         'address' => fake()->address(),
-                        'industry' => fake()->randomElement($industries),
+                        'crm_industry_id' => $industryIds->random(),
                         'lead_source_id' => $sourceIds->random(),
                         'status' => $status,
                         'lead_rating_id' => $ratingIds->random(),
